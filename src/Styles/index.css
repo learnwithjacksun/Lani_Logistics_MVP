@@ -1,0 +1,137 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fredoka:wght@300..700&family=Outfit:wght@100..900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-1: rgb(250, 120, 29);
+  --primary-2: #22c55e;
+  --secondary: #fefefe;
+  --background: #f5f6f7;
+  --background-2: #f5f6f7;
+  --line: #eee;
+  --main: #444;
+  --sub: #888;
+  --mid: #fefefe;
+}
+.dark {
+  --primary: #fa781d;
+  --primary-2: #22c55e;
+  --secondary: #121212;
+  --background: #212121;
+  --background-2: #313131;
+  --mid: #212121;
+  --line: #333;
+  --main: #fefefe;
+  --sub: #aaa;
+
+}
+/* --secondary: #131315;
+  --background: #232329;
+  --background-2: #333337;
+  --mid: #232329; */
+* {
+  user-select: none;
+}
+
+* {
+  @apply outline-none font-outfit;
+}
+html{
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--background-2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 2em;
+}
+
+body {
+  @apply bg-secondary duration-200;
+}
+
+.f {
+  @apply flex;
+}
+
+.line{
+  @apply relative before:absolute before:bottom-0 before:h-[1px] before:w-1/2 before:bg-line before:left-1/2 before:-translate-x-1/2
+}
+
+.center {
+  @apply flex justify-center items-center;
+}
+
+.main {
+  @apply max-w-[90%] 2xl:max-w-[1280px] mx-auto;
+}
+
+.layout {
+  @apply max-w-[90%] md:max-w-[700px] mx-auto;
+}
+
+.btn,
+button {
+  @apply font-semibold font-outfit text-sm tracking-wide center gap-2 duration-200 disabled:opacity-[.3] disabled:pointer-events-none;
+}
+
+.btn:active:enabled {
+  @apply brightness-90 border-0 transition-all duration-200;
+}
+
+.btn:disabled {
+  @apply brightness-100 cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-gradient-to-b from-orange-600 to-orange-400 btn text-white;
+}
+.btn-secondary {
+  @apply bg-orange-500/10 text-primary_1 btn;
+}
+.container{
+  min-height: 100dvh;
+  background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url("/bg.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  object-fit: cover;
+}
+
+span{
+  @apply text-current
+}
+
+.picking-up{
+  @apply bg-gradient-to-tr from-blue-500 to-blue-400 px-2 py-1 shadow-[0px_0px_55px] shadow-blue-400 text-xs  rounded-full text-white
+}
+.pending{
+  @apply bg-gradient-to-tr from-orange-500 to-orange-400 px-2 py-1 shadow-[0px_0px_55px] shadow-orange-400 text-xs rounded-full text-white
+}
+.delivering{
+  @apply bg-gradient-to-tr from-purple-500 to-purple-400 px-2 py-1 shadow-[0px_0px_55px] shadow-purple-400 text-xs rounded-full text-white
+}
+.completed{
+  @apply bg-gradient-to-tr from-green-500 to-green-400 px-2 py-1 shadow-[0px_0px_55px] shadow-green-400 text-xs rounded-full text-white
+}
+
+section{
+  @apply my-10 md:my-16 md:px-10  pb-[100px]
+}
+
+.nav-link:active{
+  @apply text-primary_1
+}
+
+.hide-scrollbar::-webkit-scrollbar{
+display: none;
+}
