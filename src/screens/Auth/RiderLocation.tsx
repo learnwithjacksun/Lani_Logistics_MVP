@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ArrowRight, Building2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import AuthLayout from "../../Layouts/AuthLayout";
 import { useAuth } from "../../hooks";
@@ -17,7 +16,6 @@ const locations = [
 ];
 
 const RiderLocation = () => {
-  const navigate = useNavigate();
   const { updateUserLocation } = useAuth();
   const [selectedLocation, setSelectedLocation] = useState<
     (typeof locations)[0] | null
@@ -37,12 +35,14 @@ const RiderLocation = () => {
       toast.promise(updateUserLocation(selectedLocation.city), {
         loading: "Updating location...",
         success: "Location updated successfully",
-        error: "Failed to update location",
+        error: (error) => {
+          console.error("Update location error:", error);
+          return "Failed to update location";
+        },
       });
    
 
-    toast.success(`Location set to ${selectedLocation.city}`);
-    navigate("/dashboard");
+   
   };
 
   return (

@@ -7,6 +7,8 @@ import {
   MapPin,
   Navigation,
   Phone,
+  AlertCircle,
+  Info,
 } from "lucide-react";
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { getGreeting } from "../../utils/helpers";
@@ -63,16 +65,26 @@ toast.promise(
   const recentActivities = notifications
     ?.slice(0, 3)
     ?.map(notif => ({
-      icon: notif.type === 'success' ? CheckCircle2 : 
-            notif.type === 'order' ? Package : Timer,
+      icon: notif.type === 'success' ? CheckCircle2 :
+            notif.type === 'order' ? Package :
+            notif.type === 'system' ? Info :
+            notif.type === 'alert' ? AlertCircle :
+            notif.type === 'food' ? Package : Timer,
       color: notif.type === 'success' ? 'text-green-500' :
-             notif.type === 'order' ? 'text-blue-500' : 'text-yellow-500',
+             notif.type === 'order' ? 'text-primary_1' :
+             notif.type === 'system' ? 'text-blue-500' :
+             notif.type === 'alert' ? 'text-red-500' :
+             notif.type === 'food' ? 'text-primary_1' : 'text-yellow-500',
       bg: notif.type === 'success' ? 'bg-green-500/10' :
-          notif.type === 'order' ? 'bg-blue-500/10' : 'bg-yellow-500/10',
+          notif.type === 'order' ? 'bg-orange-500/10' :
+          notif.type === 'system' ? 'bg-blue-500/10' :
+          notif.type === 'alert' ? 'bg-red-500/10' :
+          notif.type === 'food' ? 'bg-orange-500/10' : 'bg-yellow-500/10',
       text: notif.title,
       time: new Date(notif.$createdAt).toLocaleString()
     }));
 
+    
   return (
     <DashboardLayout title={`${getGreeting()}, ${firstName} 👋`}>
       <div className="max-w-3xl mx-auto space-y-6">

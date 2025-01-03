@@ -2,14 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { OrderContext } from "../Contexts/OrderContext";
 import { DispatchForm } from "../hooks/useDispatchForm";
 import { ID, Models, Query } from "appwrite";
-import {
+import client, {
   databases,
   DB,
   DISPATCH,
   STORAGE,
   storage,
 } from "../Backend/appwriteConfig";
-import { useAuth, useNotifications } from "../hooks";
+import { useAuth, useMail, useNotifications } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { generateTrackingId } from "../utils/helpers";
 
@@ -23,11 +23,11 @@ export interface OrderContextType {
   acceptOrder: (orderId: string) => Promise<void>;
   completeOrder: (orderId: string) => Promise<Models.Document>;
   allOrders: Models.Document[];
-
 }
 const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  const {createNotifications} = useNotifications()
+  const { sendEmail } = useMail();
+  const { createNotifications } = useNotifications();
   const { user, userData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [orders, setOrders] = useState<Models.Document[]>([]);
@@ -69,6 +69,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
           packageImage: packageImage?.$id,
           senderName: user?.name,
           senderPhone: userData?.phone,
+          senderEmail: user?.email,
         }
       );
       console.log(response);
@@ -78,8 +79,15 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         content: `Your order has been placed successfully, and your tracking Id is ${response?.trackingId}. \n A rider will be assigned shortly!`,
         path: response?.trackingId,
       };
-      const notifyId = response?.customerId
-      await createNotifications(notification, notifyId )
+      const notifyId = response?.customerId;
+      await createNotifications(notification, notifyId);
+      if (user?.email) {
+        sendEmail(
+          user?.email,
+          "Order Created!",
+          `Your order has been placed successfully, and your tracking Id is ${response?.trackingId}. \n A rider will be assigned shortly!`
+        );
+      }
       navigate("/dashboard");
     } catch (error) {
       console.log(error);
@@ -97,7 +105,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
           Query.equal("customerId", user?.$id),
           Query.equal("riderId", user?.$id),
         ]),
-        Query.orderDesc("$createdAt")
+        Query.orderDesc("$createdAt"),
       ]);
       setOrders(orders.documents);
     } catch (error) {
@@ -110,7 +118,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const orders = await databases.listDocuments(DB, DISPATCH, [
         Query.equal("status", "pending"),
-        Query.orderDesc("$createdAt")
+        Query.orderDesc("$createdAt"),
       ]);
       setAllOrders(orders.documents);
     } catch (error) {
@@ -137,19 +145,26 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         type: "order",
         content: `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`,
         path: res?.trackingId,
-        activity: `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`
+        activity: `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`,
       };
       const riderNotification = {
         title: "Order Status Update!",
         type: "order",
         content: `You accepted an order by ${res?.senderName}, with a trackingId of #${res?.trackingId}!`,
         path: res?.trackingId,
-        activity: `You accepted an order by ${res?.senderName}, with a trackingId of #${res?.trackingId}!`
+        activity: `You accepted an order by ${res?.senderName}, with a trackingId of #${res?.trackingId}!`,
       };
-      const customerNotifyId = res?.customerId
-      await createNotifications(customerNotification, customerNotifyId )
-      const riderNotifyId = res?.riderId
-      await createNotifications(riderNotification, riderNotifyId )
+      const customerNotifyId = res?.customerId;
+      await createNotifications(customerNotification, customerNotifyId);
+      const riderNotifyId = res?.riderId;
+      await createNotifications(riderNotification, riderNotifyId);
+      if (res?.customerId) {
+        sendEmail(
+          res?.senderEmail,
+          "Order Accepted!",
+          `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`
+        );
+      }
     } catch (error) {
       console.log(error);
       throw new Error((error as Error).message);
@@ -158,42 +173,70 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
 
   const completeOrder = async (orderId: string) => {
     try {
-      if (!orderId) throw new Error('Order ID is required');
+      if (!orderId) throw new Error("Order ID is required");
 
-      const order = await databases.updateDocument(
-        DB,
-        DISPATCH,
-        orderId,
-        {
-          status: 'delivered'
-        }
-      );
+      const order = await databases.updateDocument(DB, DISPATCH, orderId, {
+        status: "delivered",
+      });
 
-      setOrders(prevOrders => 
-        prevOrders.map(o => o.$id === orderId ? { ...o, status: 'delivered' } : o)
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o.$id === orderId ? { ...o, status: "delivered" } : o
+        )
       );
 
       // customer notification
-      await createNotifications({
-        title: "Order Status Update!",
-        type: "success",
-        content: `Your order has been delivered successfully, #${order?.trackingId}!`,
-        path: order?.trackingId,
-      }, order?.customerId) 
+      await createNotifications(
+        {
+          title: "Order Status Update!",
+          type: "success",
+          content: `Your order has been delivered successfully, #${order?.trackingId}!`,
+          path: order?.trackingId,
+        },
+        order?.customerId
+      );
 
       // rider notification
-      await createNotifications({
-        title: "Order Status Update!",
-        type: "success",
-        content: `You have completed an order by ${order?.senderName}, with a trackingId of #${order?.trackingId}!`,
-        path: order?.trackingId,
-      }, order?.riderId) 
+      await createNotifications(
+        {
+          title: "Order Status Update!",
+          type: "success",
+          content: `You have completed an order by ${order?.senderName}, with a trackingId of #${order?.trackingId}!`,
+          path: order?.trackingId,
+        },
+        order?.riderId
+      );
+      if (order?.senderEmail) {
+        sendEmail(
+          order?.senderEmail,
+          "Order Delivered!",
+          `Your order has been delivered successfully, #${order?.trackingId}!`
+        );
+      }
       return order;
     } catch (error) {
-      console.error('Complete order error:', error);
-      throw new Error('Failed to complete order');
+      console.error("Complete order error:", error);
+      throw new Error("Failed to complete order");
     }
   };
+
+  useEffect(() => {
+    const unsubscribe = client.subscribe(
+      [`databases.${DB}.collections.${DISPATCH}.documents`],
+      (response) => {
+        const event = response.events[0];
+        if (event.includes("create")) {
+          getAllOrders();
+          getUserOrders();
+        } else if (event.includes("update")) {
+          getAllOrders();
+          getUserOrders();
+        }
+      }
+    );
+
+    return () => unsubscribe();
+  }, [getAllOrders, getUserOrders, orders]);
 
   const value: OrderContextType = {
     createDispatchOrder,
@@ -201,7 +244,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     orders,
     allOrders,
     acceptOrder,
-    completeOrder
+    completeOrder,
   };
 
   return (

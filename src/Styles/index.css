@@ -98,14 +98,7 @@ button {
 .btn-secondary {
   @apply bg-orange-500/10 text-primary_1 btn;
 }
-.container{
-  min-height: 100dvh;
-  background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url("/bg.jpg");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  object-fit: cover;
-}
+
 
 span{
   @apply text-current

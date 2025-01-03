@@ -20,7 +20,7 @@ const Navbar = () => {
     {
       name: userType === 'rider' ? "Available Orders" : "Request Dispatch",
       icon: Package,
-      to: userType === 'rider' ? "/available-orders" : "/dispatch",
+      to: userType === 'rider' ? "/available-orders" : "/pending-orders",
     },
     {
       name: "History",

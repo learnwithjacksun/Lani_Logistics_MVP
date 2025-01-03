@@ -1,13 +1,20 @@
 import { ID, Models, Query } from "appwrite";
-import { databases, NOTIFICATIONS, DB } from "../Backend/appwriteConfig";
+import client, {
+  databases,
+  NOTIFICATIONS,
+  DB,
+  account,
+} from "../Backend/appwriteConfig";
 import { NotificationContext } from "../Contexts/NotificationContext";
 import { Notification } from "../types/notification";
-import { useAuth } from "../hooks";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export interface NotificationContextType {
-  createNotifications: (notification: Notification, id:string) => Promise<void>;
+  createNotifications: (
+    notification: Notification,
+    id: string
+  ) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   notifications: Models.Document[] | null;
   unreadCount: number;
@@ -16,13 +23,29 @@ export interface NotificationContextType {
 }
 
 const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const [userId, setUserId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<Models.Document[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const user = await account.get();
+        const userId = user?.$id;
+        setUserId(userId);
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    };
+    getUserId();
+  }, []);
 
-  const createNotifications = async (notification: Notification, id:string) => {
+  const createNotifications = async (
+    notification: Notification,
+    id: string
+  ) => {
     try {
       const notificationDoc = await databases.createDocument(
         DB,
@@ -34,11 +57,14 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
           content: notification.content,
           title: notification.title,
           path: notification.path,
-          activity: notification.activity,
-
         }
       );
       console.log(notificationDoc);
+      // await sendNotification(
+      //   userId,
+      //   notification.title,
+      //   notification.content
+      // );
     } catch (error) {
       console.error(error);
       throw error;
@@ -47,17 +73,17 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getNotifications = useCallback(async () => {
     try {
-      if (!user?.$id) return;
+      if (!userId) return;
       const notifications = await databases.listDocuments(DB, NOTIFICATIONS, [
-        Query.equal("notificationId", user?.$id),
-        Query.orderDesc("$createdAt")
+        Query.equal("notificationId", userId),
+        Query.orderDesc("$createdAt"),
       ]);
       setNotifications(notifications.documents as Models.Document[]);
     } catch (error) {
       console.error(error);
       throw error;
     }
-  }, [user?.$id]);
+  }, [userId]);
 
   useEffect(() => {
     getNotifications();
@@ -65,7 +91,7 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (notifications) {
-      setUnreadCount(notifications.filter(n => !n.isRead).length);
+      setUnreadCount(notifications.filter((n) => !n.isRead).length);
     }
   }, [notifications]);
 
@@ -80,7 +106,7 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
           isRead: true,
         });
       }
-      toast.success('All notifications marked as read');
+      toast.success("All notifications marked as read");
       await getNotifications();
     } catch (error) {
       console.error(error);
@@ -91,17 +117,32 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const markAsRead = async (notificationId: string) => {
-   try {
-    await databases.updateDocument(DB, NOTIFICATIONS, notificationId, {
-      isRead: true,
-    });
-    await getNotifications();
-    toast.success('Notification marked as read');
-   } catch (error) {
-    console.error(error);
-    throw error;
-   }
+    try {
+      await databases.updateDocument(DB, NOTIFICATIONS, notificationId, {
+        isRead: true,
+      });
+      await getNotifications();
+      toast.success("Notification marked as read");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   };
+
+  useEffect(() => {
+    const unsubscribe = client.subscribe(
+      [`databases.${DB}.collections.${NOTIFICATIONS}.documents`],
+      (response) => {
+        const event = response.events[0];
+        if (event.includes("create")) {
+          getNotifications();
+        } else if (event.includes("update")) {
+          getNotifications();
+        }
+      }
+    );
+    return () => unsubscribe();
+  }, [getNotifications]);
 
   const contextValue: NotificationContextType = {
     createNotifications,
@@ -109,7 +150,7 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
     notifications,
     unreadCount,
     isLoading,
-    markAsRead
+    markAsRead,
   };
 
   return (

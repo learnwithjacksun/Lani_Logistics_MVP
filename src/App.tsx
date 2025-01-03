@@ -1,9 +1,5 @@
 import { lazy, Suspense } from "react";
-import {
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Loading from "./screens/Loading";
 import { Toaster } from "react-hot-toast";
 import OrderDetails from "./screens/History/OrderDetails";
@@ -25,6 +21,8 @@ const Notifications = lazy(
 const RiderLocation = lazy(() => import("./screens/Auth/RiderLocation"));
 const RiderDashboard = lazy(() => import("./screens/Dashboard/RiderDashboard"));
 const AvailableOrders = lazy(() => import("./screens/Rider/AvailableOrders"));
+const PendingOrders = lazy(() => import("./screens/Rider/PendingOrders"));
+const ActiveOrders = lazy(() => import("./screens/Rider/ActiveOrders"));
 
 const App = () => {
   return (
@@ -85,6 +83,22 @@ const App = () => {
             element={
               <ProtectedRoute allowedRole="rider">
                 <AvailableOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pending-orders"
+            element={
+              <ProtectedRoute allowedRole="customer">
+                <PendingOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/active-orders"
+            element={
+              <ProtectedRoute allowedRole="customer">
+                <ActiveOrders />
               </ProtectedRoute>
             }
           />

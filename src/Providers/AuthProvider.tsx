@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ID, Models } from "appwrite";
 import { account, databases, DB, USERS } from "../Backend/appwriteConfig";
 import toast from "react-hot-toast";
+import { useMail, useNotifications } from "../hooks";
 
 export interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -23,6 +24,8 @@ export interface AuthContextType {
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
+  const {sendEmail} = useMail();
+  const {createNotifications} = useNotifications();
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
     null
   );
@@ -97,6 +100,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           await navigate("/dashboard");
         }
       }
+      await sendEmail(email, "Welcome to Lani Logistics", "Thank you for registering with us");
+      await createNotifications(
+      {
+        title: "Welcome to Lani Logistics",
+        type: "system",
+        content: "Thank you for registering with us",
+        path: "/dashboard", 
+      }, accountResponse.$id);
     } catch (error) {
       console.error("Registration error:", error);
       throw new Error((error as Error).message);
@@ -156,11 +167,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         location: city,
       });
       setUserData(updatedUser as Models.Document);
-      toast.success("Location Added Successfully");
       navigate("/rider-dashboard");
     } catch (error) {
       console.error("Update location error:", error);
-      toast.error("Failed to update location");
       throw error;
     }
   };
