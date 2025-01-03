@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ID, Models } from "appwrite";
 import { account, databases, DB, USERS } from "../Backend/appwriteConfig";
-import toast from "react-hot-toast";
 import { useMail, useNotifications } from "../hooks";
 
 export interface AuthContextType {
@@ -67,17 +66,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let accountResponse;
 
     try {
-      const exists = await account.get();
-      if (exists) {
-        toast.error("Email already registered");
-        return;
-      }
+      
       accountResponse = await account.create(
         ID.unique(),
         email,
         password,
         name
       );
+      await account.createEmailPasswordSession(email, password);
+      const accountDetails = await account.get();
       const userData = await databases.createDocument(
         DB,
         USERS,
@@ -89,8 +86,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           role,
         }
       );
-      await account.createEmailPasswordSession(email, password);
-      const accountDetails = await account.get();
       setUser(accountDetails);
       setUserData(userData);
       if (userData) {
@@ -100,7 +95,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           await navigate("/dashboard");
         }
       }
-      await sendEmail(email, "Welcome to Lani Logistics", "Thank you for registering with us");
+       sendEmail(email, "Welcome to Lani Logistics", "Thank you for registering with us");
       await createNotifications(
       {
         title: "Welcome to Lani Logistics",
