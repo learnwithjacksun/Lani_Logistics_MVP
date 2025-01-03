@@ -19,7 +19,6 @@ const AvailableOrders = () => {
       success: "Order accepted successfully",
       error: (error: Error) => error.message,
     });
-    // Handle order acceptance logic
   };
 
   const imgUrl = (img: string) => {

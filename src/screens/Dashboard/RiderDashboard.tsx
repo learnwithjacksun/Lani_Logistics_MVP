@@ -46,45 +46,62 @@ const RiderDashboard = () => {
     setShowCompleteModal(true);
   };
   const handleCompleteDelivery = (id: string) => {
-toast.promise(
-  completeOrder(id),
-   {
-  loading: "Completing delivery...",
-  success: "Delivery completed successfully",
-  error: (error) => error.message
-})
-  }
+    toast.promise(completeOrder(id), {
+      loading: "Completing delivery...",
+      success: "Delivery completed successfully",
+      error: (error) => error.message,
+    });
+    setShowCompleteModal(false);
+  };
 
   const handleViewOrders = () => {
-    navigate("/available-orders")
+    navigate("/available-orders");
   };
   const viewHistory = () => {
     navigate("/history");
   };
 
-  const recentActivities = notifications
-    ?.slice(0, 3)
-    ?.map(notif => ({
-      icon: notif.type === 'success' ? CheckCircle2 :
-            notif.type === 'order' ? Package :
-            notif.type === 'system' ? Info :
-            notif.type === 'alert' ? AlertCircle :
-            notif.type === 'food' ? Package : Timer,
-      color: notif.type === 'success' ? 'text-green-500' :
-             notif.type === 'order' ? 'text-primary_1' :
-             notif.type === 'system' ? 'text-blue-500' :
-             notif.type === 'alert' ? 'text-red-500' :
-             notif.type === 'food' ? 'text-primary_1' : 'text-yellow-500',
-      bg: notif.type === 'success' ? 'bg-green-500/10' :
-          notif.type === 'order' ? 'bg-orange-500/10' :
-          notif.type === 'system' ? 'bg-blue-500/10' :
-          notif.type === 'alert' ? 'bg-red-500/10' :
-          notif.type === 'food' ? 'bg-orange-500/10' : 'bg-yellow-500/10',
-      text: notif.title,
-      time: new Date(notif.$createdAt).toLocaleString()
-    }));
+  const recentActivities = notifications?.slice(0, 3)?.map((notif) => ({
+    icon:
+      notif.type === "success"
+        ? CheckCircle2
+        : notif.type === "order"
+        ? Package
+        : notif.type === "system"
+        ? Info
+        : notif.type === "alert"
+        ? AlertCircle
+        : notif.type === "food"
+        ? Package
+        : Timer,
+    color:
+      notif.type === "success"
+        ? "text-green-500"
+        : notif.type === "order"
+        ? "text-primary_1"
+        : notif.type === "system"
+        ? "text-blue-500"
+        : notif.type === "alert"
+        ? "text-red-500"
+        : notif.type === "food"
+        ? "text-primary_1"
+        : "text-yellow-500",
+    bg:
+      notif.type === "success"
+        ? "bg-green-500/10"
+        : notif.type === "order"
+        ? "bg-orange-500/10"
+        : notif.type === "system"
+        ? "bg-blue-500/10"
+        : notif.type === "alert"
+        ? "bg-red-500/10"
+        : notif.type === "food"
+        ? "bg-orange-500/10"
+        : "bg-yellow-500/10",
+    text: notif.title,
+    time: new Date(notif.$createdAt).toLocaleString(),
+  }));
 
-    
   return (
     <DashboardLayout title={`${getGreeting()}, ${firstName} 👋`}>
       <div className="max-w-3xl mx-auto space-y-6">
@@ -140,7 +157,10 @@ toast.promise(
             </p>
           </div>
 
-          <div onClick={viewHistory} className="bg-background border border-line rounded-xl p-4">
+          <div
+            onClick={viewHistory}
+            className="bg-background border border-line rounded-xl p-4"
+          >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-blue-500/10">
                 <Package size={18} className="text-blue-500" />
@@ -152,7 +172,10 @@ toast.promise(
             </p>
           </div>
 
-          <div onClick={handleViewOrders} className="bg-background border border-line rounded-xl p-4">
+          <div
+            onClick={handleViewOrders}
+            className="bg-background border border-line rounded-xl p-4"
+          >
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg bg-yellow-500/10">
                 <Package size={18} className="text-yellow-500" />
@@ -175,7 +198,6 @@ toast.promise(
               <div className="text-center py-8 text-sub">
                 <Package size={40} className="mx-auto mb-3 text-sub/50" />
                 <p>No active deliveries at the moment</p>
-                
               </div>
             ) : (
               activeDeliveries.map((activeDelivery) => (
@@ -280,7 +302,7 @@ toast.promise(
                     {activeDelivery?.packageName}
                   </h3>
                   <p className="text-sm text-sub">
-                    ID: {activeDelivery?.trackingId} 
+                    ID: {activeDelivery?.trackingId}
                   </p>
                 </div>
               </div>
@@ -298,7 +320,11 @@ toast.promise(
                     key={index}
                     className="flex items-start gap-3 p-3 border border-line rounded-lg cursor-pointer hover:border-primary_1"
                   >
-                    <input type="checkbox" className="mt-1 accent-primary_2" required />
+                    <input
+                      type="checkbox"
+                      className="mt-1 accent-primary_2"
+                      required
+                    />
                     <span className="text-sm text-main">{item}</span>
                   </label>
                 ))}
@@ -315,7 +341,10 @@ toast.promise(
                 Cancel
               </button>
               <button
-                onClick={() => activeDelivery?.$id && handleCompleteDelivery(activeDelivery.$id)}
+                onClick={() =>
+                  activeDelivery?.$id &&
+                  handleCompleteDelivery(activeDelivery.$id)
+                }
                 disabled={isLoading || !activeDelivery?.$id}
                 className="flex-1 btn btn-primary py-3 rounded-xl disabled:opacity-50"
               >

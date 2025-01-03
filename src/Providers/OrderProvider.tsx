@@ -88,7 +88,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
           `Your order has been placed successfully, and your tracking Id is ${response?.trackingId}. \n A rider will be assigned shortly!`
         );
       }
-      navigate("/dashboard");
+      navigate("/pending-orders");
     } catch (error) {
       console.log(error);
       throw new Error((error as Error).message);
@@ -141,14 +141,14 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         riderPhone: userData?.phone,
       });
       const customerNotification = {
-        title: "Order Status Update!",
+        title: "Order Accepted!",
         type: "order",
         content: `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`,
         path: res?.trackingId,
         activity: `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`,
       };
       const riderNotification = {
-        title: "Order Status Update!",
+        title: "Order Accepted!",
         type: "order",
         content: `You accepted an order by ${res?.senderName}, with a trackingId of #${res?.trackingId}!`,
         path: res?.trackingId,
@@ -165,6 +165,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
           `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`
         );
       }
+      navigate("/rider-dashboard");
     } catch (error) {
       console.log(error);
       throw new Error((error as Error).message);
@@ -188,7 +189,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
       // customer notification
       await createNotifications(
         {
-          title: "Order Status Update!",
+          title: "Order Completed!",
           type: "success",
           content: `Your order has been delivered successfully, #${order?.trackingId}!`,
           path: order?.trackingId,
@@ -199,7 +200,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
       // rider notification
       await createNotifications(
         {
-          title: "Order Status Update!",
+          title: "Order Completed!",
           type: "success",
           content: `You have completed an order by ${order?.senderName}, with a trackingId of #${order?.trackingId}!`,
           path: order?.trackingId,
