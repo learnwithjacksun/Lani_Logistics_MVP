@@ -27,7 +27,7 @@ const ActiveOrders = () => {
             activeOrders.map((order) => (
               <div
                 key={order.$id}
-                onClick={() => navigate(`/history/${order.$id}`)}
+                onClick={() => navigate(`/history/${order.trackingId}`)}
                 className="bg-background border border-line rounded-xl p-4 space-y-4 cursor-pointer hover:border-primary_1 transition-all"
               >
                 <div className="flex gap-4">
