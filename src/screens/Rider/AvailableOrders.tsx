@@ -10,9 +10,34 @@ import toast from "react-hot-toast";
 import useOrder from "../../hooks/useOrder";
 import { STORAGE, storage } from "../../Backend/appwriteConfig";
 import { useState } from "react";
+import { useAuth } from "../../hooks";
 
 const AvailableOrders = () => {
-  const { allOrders, acceptOrder, isLoading } = useOrder();
+  const { allOrders, acceptOrder, isLoading, orders } = useOrder();
+  const { userData } = useAuth();
+
+  // Check active orders count
+  const activeOrdersCount = orders.filter(
+    order => order.status === "in-transit"
+  ).length;
+
+  const canAcceptOrders = activeOrdersCount < 2;
+
+  // Add warning message at the top if rider has max orders
+  const renderWarningBanner = () => {
+    if (!canAcceptOrders) {
+      return (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-4">
+          <p className="text-red-500 text-sm">
+            You have reached the maximum limit of 2 active orders. 
+            Please complete your current deliveries before accepting new orders.
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   const handleAcceptOrder = (orderId: string) => {
     toast.promise(acceptOrder(orderId), {
       loading: "Accepting order...",
@@ -28,9 +53,19 @@ const AvailableOrders = () => {
   const handleDetailsOpen = () => {
     setIsDetailsOpen(prev => !prev);
   }
+
+  const noOrdersMessage = () => {
+    if (!userData?.location) {
+      return "Please set your location to see available orders";
+    }
+    return `No orders available in ${userData.location} at the moment`;
+  };
+
   return (
     <DashboardLayout title="Available Orders">
       <div className="max-w-3xl mx-auto space-y-6">
+        {renderWarningBanner()}
+        
         {/* Header Stats */}
         <div className="bg-background border border-line rounded-xl p-4">
           <div className="flex items-center gap-3">
@@ -40,7 +75,7 @@ const AvailableOrders = () => {
             <div>
               <h3 className="font-medium text-main">New Orders</h3>
               <p className="text-sm text-sub">
-                {allOrders.length} orders available
+                {allOrders.length} orders available in {userData?.location || 'your area'}
               </p>
             </div>
           </div>
@@ -50,7 +85,7 @@ const AvailableOrders = () => {
         <div className="space-y-4">
           {allOrders.length === 0 ? (
             <div className="text-center py-12 text-sub">
-              No orders available at the moment
+              {noOrdersMessage()}
             </div>
           ) : (
             allOrders.map((order) => (
@@ -141,9 +176,11 @@ const AvailableOrders = () => {
                     <button
                       onClick={() => handleAcceptOrder(order?.$id)}
                       className="w-full btn btn-primary py-3 rounded-xl"
-                      disabled={isLoading}
+                      disabled={isLoading || !canAcceptOrders}
                     >
-                      Accept Order
+                      {!canAcceptOrders 
+                        ? "Complete current orders first" 
+                        : "Accept Order"}
                     </button>
                   </>
                 )}

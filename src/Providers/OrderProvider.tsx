@@ -51,7 +51,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         DISPATCH,
         ID.unique(),
         {
-          trackingId: id,
+          trackingId: `TRX-${id}`,
           customerId: user?.$id,
           city: selectedCity,
           price: data.amount,
@@ -114,17 +114,18 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user?.$id]);
 
   const getAllOrders = useCallback(async () => {
-    if (!user?.$id) return;
+    if (!user?.$id || !userData?.location) return;
     try {
       const orders = await databases.listDocuments(DB, DISPATCH, [
         Query.equal("status", "pending"),
+        Query.equal("city", userData.location),
         Query.orderDesc("$createdAt"),
       ]);
       setAllOrders(orders.documents);
     } catch (error) {
       console.error(error);
     }
-  }, [user?.$id]);
+  }, [user?.$id, userData?.location]);
 
   useEffect(() => {
     getUserOrders();
@@ -134,6 +135,15 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const acceptOrder = async (orderId: string) => {
     setIsLoading(true);
     try {
+      // Check number of active orders for this rider
+      const activeOrders = orders.filter(
+        order => order.riderId === user?.$id && order.status === "in-transit"
+      );
+
+      if (activeOrders.length >= 2) {
+        throw new Error("You can only handle 2 orders at a time. Please complete your current orders first.");
+      }
+
       const res = await databases.updateDocument(DB, DISPATCH, orderId, {
         status: "in-transit",
         riderId: user?.$id,
@@ -143,16 +153,16 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
       const customerNotification = {
         title: "Order Accepted!",
         type: "order",
-        content: `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`,
+        content: `A rider, ${res?.riderName} has been assigned to your order, ${res?.trackingId}!`,
         path: res?.trackingId,
-        activity: `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`,
+        activity: `A rider, ${res?.riderName} has been assigned to your order, ${res?.trackingId}!`,
       };
       const riderNotification = {
         title: "Order Accepted!",
         type: "order",
-        content: `You accepted an order by ${res?.senderName}, with a trackingId of #${res?.trackingId}!`,
+        content: `You accepted an order by ${res?.senderName}, with a trackingId of ${res?.trackingId}!`,
         path: res?.trackingId,
-        activity: `You accepted an order by ${res?.senderName}, with a trackingId of #${res?.trackingId}!`,
+        activity: `You accepted an order by ${res?.senderName}, with a trackingId of ${res?.trackingId}!`,
       };
       const customerNotifyId = res?.customerId;
       await createNotifications(customerNotification, customerNotifyId);
@@ -162,7 +172,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         sendEmail(
           res?.senderEmail,
           "Order Accepted!",
-          `A rider, ${res?.riderName} has been assigned to your order, #${res?.trackingId}!`
+          `A rider, ${res?.riderName} has been assigned to your order, ${res?.trackingId}!`
         );
       }
       navigate("/rider-dashboard");
@@ -191,7 +201,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         {
           title: "Order Completed!",
           type: "success",
-          content: `Your order has been delivered successfully, #${order?.trackingId}!`,
+          content: `Your order has been delivered successfully, ${order?.trackingId}!`,
           path: order?.trackingId,
         },
         order?.customerId
@@ -202,7 +212,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         {
           title: "Order Completed!",
           type: "success",
-          content: `You have completed an order by ${order?.senderName}, with a trackingId of #${order?.trackingId}!`,
+          content: `You have completed an order by ${order?.senderName}, with a trackingId of ${order?.trackingId}!`,
           path: order?.trackingId,
         },
         order?.riderId
@@ -211,7 +221,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         sendEmail(
           order?.senderEmail,
           "Order Delivered!",
-          `Your order has been delivered successfully, #${order?.trackingId}!`
+          `Your order has been delivered successfully, ${order?.trackingId}!`
         );
       }
       return order;

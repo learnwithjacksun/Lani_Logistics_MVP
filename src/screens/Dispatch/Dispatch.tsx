@@ -137,7 +137,7 @@ const Dispatch = () => {
                     onChange={handleChange}
                   />
                   <Input
-                    label="Landmark"
+                    label="Landmark (Optional)"
                     name="pickupLandmark"
                     value={formData.pickupLandmark}
                     placeholder="Nearest landmark"
@@ -163,7 +163,7 @@ const Dispatch = () => {
                     onChange={handleChange}
                   />
                   <Input
-                    label="Landmark"
+                    label="Landmark (Optional)"
                     placeholder="Nearest landmark"
                     name="deliveryLandmark"
                     value={formData.deliveryLandmark}
