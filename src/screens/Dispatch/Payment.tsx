@@ -2,8 +2,9 @@
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { Package, MapPin, Clock, ArrowLeft, User } from "lucide-react";
 import toast from "react-hot-toast";
-import { useOrder } from "../../hooks";
+import { useAuth, useOrder } from "../../hooks";
 import { DispatchForm } from "../../hooks/useDispatchForm";
+import { PaystackButton } from "react-paystack";
 
 interface PaymentProps {
   deliveryDetails: DispatchForm;
@@ -11,12 +12,28 @@ interface PaymentProps {
   selectedCity: string;
 }
 
+const publicKey = "pk_test_36a25be00a369ea7d01b5354a5d83e3c003c2cde";
+
 const Payment = ({
   deliveryDetails,
   onPaymentClose,
   selectedCity,
 }: PaymentProps) => {
-  const { createDispatchOrder, isLoading } = useOrder();
+  const { userData } = useAuth();
+  const componentProps = {
+    email: userData?.email,
+    amount: deliveryDetails.amount * 100,
+    metadata: {
+      name: userData?.name,
+      phone: userData?.phone,
+      custom_fields: []
+    },
+    publicKey,
+    text: "Pay Now",
+    onSuccess: () => handlePayment(),
+    onClose: () => toast.error("Payment cancelled"),
+  };
+  const { createDispatchOrder } = useOrder();
 
   const handlePayment = async () => {
     toast.promise(createDispatchOrder(deliveryDetails, selectedCity), {
@@ -137,13 +154,13 @@ const Payment = ({
         </div>
 
         {/* Payment Button */}
-        <button
-          onClick={handlePayment}
-          disabled={isLoading}
+        <PaystackButton
           className="w-full btn btn-primary py-4 rounded-xl text-lg disabled:opacity-50"
-        >
+          {...componentProps}
+        />
+        {/* <button onClick={handlePayment} disabled={isLoading}>
           {isLoading ? "Processing..." : "Pay Now"}
-        </button>
+        </button> */}
       </div>
     </DashboardLayout>
   );

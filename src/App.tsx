@@ -23,6 +23,7 @@ const RiderDashboard = lazy(() => import("./screens/Dashboard/RiderDashboard"));
 const AvailableOrders = lazy(() => import("./screens/Rider/AvailableOrders"));
 const PendingOrders = lazy(() => import("./screens/Rider/PendingOrders"));
 const ActiveOrders = lazy(() => import("./screens/Rider/ActiveOrders"));
+const Food = lazy(() => import("./screens/Food/Food"));
 
 const App = () => {
   return (
@@ -102,6 +103,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/food" element={<Food />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

@@ -16,7 +16,7 @@ const locations = [
 ];
 
 const RiderLocation = () => {
-  const { updateUserLocation } = useAuth();
+  const { updateUserLocation,  } = useAuth();
   const [selectedLocation, setSelectedLocation] = useState<
     (typeof locations)[0] | null
   >(null);

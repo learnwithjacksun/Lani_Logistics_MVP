@@ -26,11 +26,42 @@ const RiderDashboard = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [activeDelivery, setActiveDelivery] = useState<Models.Document>();
-  const [earnings] = useState({
-    today: 4500,
-    week: 28000,
-    deliveries: 12,
-  });
+
+  const calculateStats = () => {
+    const completedOrders = orders.filter(order => order.status === "delivered");
+    
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    
+    const todayEarnings = completedOrders
+      .filter(order => {
+        const orderDate = new Date(order.$createdAt);
+        return orderDate >= todayStart && orderDate <= todayEnd;
+      })
+      .reduce((sum, order) => sum + order.price, 0);
+
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
+    weekStart.setHours(0, 0, 0, 0);
+    
+    const weeklyEarnings = completedOrders
+      .filter(order => new Date(order.$createdAt) >= weekStart)
+      .reduce((sum, order) => sum + order.price, 0);
+
+    const totalDeliveries = completedOrders.length;
+
+    return {
+      today: todayEarnings,
+      week: weeklyEarnings,
+      deliveries: totalDeliveries
+    };
+  };
+
+  const earnings = calculateStats();
+
   const { notifications } = useNotifications();
 
   const handleStatusToggle = () => {

@@ -49,10 +49,14 @@ const AvailableOrders = () => {
   const imgUrl = (img: string) => {
     return storage.getFilePreview(STORAGE, img);
   };
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const handleDetailsOpen = () => {
-    setIsDetailsOpen(prev => !prev);
-  }
+  const [openDetails, setOpenDetails] = useState<Record<string, boolean>>({});
+
+  const handleDetailsToggle = (orderId: string) => {
+    setOpenDetails(prev => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }));
+  };
 
   const noOrdersMessage = () => {
     if (!userData?.location) {
@@ -104,14 +108,22 @@ const AvailableOrders = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <button className="btn text-main" onClick={handleDetailsOpen}>
+                    <button 
+                      className="btn text-main" 
+                      onClick={() => handleDetailsToggle(order.$id)}
+                    >
                       <span>Details</span>
-                      <ChevronDown size={18} className={`text-primary_1 duration-200 ${isDetailsOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown 
+                        size={18} 
+                        className={`text-primary_1 duration-200 ${
+                          openDetails[order.$id] ? 'rotate-180' : ''
+                        }`} 
+                      />
                     </button>
                   </div>
                 </div>
 
-                {isDetailsOpen && (
+                {openDetails[order.$id] && (
                   <>
                     {/* Package image */}
                     <div className="h-[200px] overflow-hidden">

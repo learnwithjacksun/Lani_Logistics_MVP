@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ID, Models } from "appwrite";
 import { account, databases, DB, USERS } from "../Backend/appwriteConfig";
 import { useMail, useNotifications } from "../hooks";
+import toast from "react-hot-toast";
 
 export interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -155,17 +156,24 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateUserLocation = async (city: string) => {
-    if (!user) return;
+    setLoading(true);
+    if (!user) {
+      toast.error("User not found");
+      return;
+    }
+
 
     try {
       const updatedUser = await databases.updateDocument(DB, USERS, user.$id, {
         location: city,
       });
       setUserData(updatedUser as Models.Document);
-      navigate("/rider-dashboard");
+      await navigate("/rider-dashboard");
     } catch (error) {
       console.error("Update location error:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

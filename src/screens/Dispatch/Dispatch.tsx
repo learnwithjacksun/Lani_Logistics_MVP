@@ -6,6 +6,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { City } from "../../types/dispatch";
 import Payment from "./Payment";
+import ScrollToTop from "../../components/Common/ScrollToTop";
 
 const cities: City[] = [
   { name: "Uyo", state: "Akwa Ibom", basePrice: 1600 },
@@ -53,9 +54,6 @@ const Dispatch = () => {
   };
 
   
-
-
-
   const handlePaymentClose = () => {
     setShowPayment(false);
   };
@@ -66,12 +64,16 @@ const Dispatch = () => {
   };
 
   if (showPayment) {
+
     return (
-      <Payment 
-        deliveryDetails={formData}  
-        onPaymentClose={handlePaymentClose}
-        selectedCity={selectedCity.name}
-      />
+      <>
+      <ScrollToTop/>
+        <Payment 
+          deliveryDetails={formData}  
+          onPaymentClose={handlePaymentClose}
+          selectedCity={selectedCity.name}
+        />
+      </>
     );
   }
 
@@ -109,13 +111,13 @@ const Dispatch = () => {
         </div>
 
         {/* Delivery Form */}
-        <div className=" border border-line rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-line">
+        <div className=" md:border border-line rounded-2xl overflow-hidden">
+          <div className="md:px-6 py-4 border-b border-line">
             <h3 className="font-semibold text-xl text-main">Delivery Details</h3>
             <p className="text-sub text-sm mt-1 font-dm">Fill in the delivery information</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          <form onSubmit={handleSubmit} className="md:px-6 py-6 space-y-8">
             {/* Locations */}
             <div className="relative">
               {/* <div className="absolute left-[17px] top-[76px] bottom-4 w-[2px] bg-line" /> */}
@@ -318,11 +320,7 @@ const Dispatch = () => {
                 <span className="text-main font-medium">₦{selectedCity.basePrice.toLocaleString()}</span>
               </div>
               
-              {/* You can add more price details here if needed */}
-              {/* <div className="flex items-center justify-between mb-2">
-                <span className="text-sub">Distance Fee</span>
-                <span className="text-main font-medium">₦500</span>
-              </div> */}
+             
               
               <div className="border-t border-line my-3" />
               
