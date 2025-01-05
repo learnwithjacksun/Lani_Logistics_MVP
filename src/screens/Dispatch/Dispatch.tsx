@@ -1,4 +1,4 @@
-import { MapPin, Package, Info, ArrowRight, CheckCircle2, ChevronDown, ImageIcon, X, Clock, User, Phone } from "lucide-react";
+import { MapPin, Package, ArrowRight, CheckCircle2, ChevronDown, ImageIcon, X, Clock, User, Phone } from "lucide-react";
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { Input } from "../../components/Common";
 import { useDispatchForm } from "../../hooks";
@@ -309,26 +309,28 @@ const Dispatch = () => {
             </div>
 
             {/* Price Summary */}
-            <div className="border border-line bg-background rounded-xl p-4 mt-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Info size={20} className="text-primary_1" />
-                <h4 className="font-medium text-main">Price Summary</h4>
-              </div>
-
-              <div className="flex items-center justify-between mb-2">
+            <div className="bg-background_2 p-4 rounded-xl space-y-2">
+              <h3 className="font-medium text-main">Price Summary</h3>
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-sub">Base Price</span>
-                <span className="text-main font-medium">₦{selectedCity.basePrice.toLocaleString()}</span>
+                {formData.pickupTime === 'scheduled' ? (
+                  <div className="text-right">
+                    <span className="line-through text-sub">₦{selectedCity.basePrice}</span>
+                    <span className="text-main ml-2">₦{formData.amount}</span>
+                  </div>
+                ) : (
+                  <span className="text-main">₦{formData.amount}</span>
+                )}
               </div>
-              
-             
-              
-              <div className="border-t border-line my-3" />
-              
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-main">Total Amount</span>
-                <span className="text-lg font-semibold text-primary_1">
-                  ₦{selectedCity.basePrice.toLocaleString()}
-                </span>
+              {formData.pickupTime === 'scheduled' && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-sub">Scheduled Delivery Discount</span>
+                  <span className="text-red-500">-₦100</span>
+                </div>
+              )}
+              <div className="pt-2 border-t border-line flex items-center justify-between font-medium">
+                <span className="text-main">Total</span>
+                <span className="text-primary_1">₦{formData.amount}</span>
               </div>
             </div>
 

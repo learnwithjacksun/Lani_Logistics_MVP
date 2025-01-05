@@ -24,12 +24,9 @@ export interface DispatchForm {
 const useDispatchForm = () => {
   const [showPayment, setShowPayment] = useState(false);
 
-  // Helper function to get initial date-time string
   const getInitialDateTime = () => {
     const now = new Date();
-    // Add 1 hour to current time
     now.setHours(now.getHours() + 1);
-    // Format to YYYY-MM-DDThh:mm
     return now.toISOString().slice(0, 16);
   };
 
@@ -42,7 +39,7 @@ const useDispatchForm = () => {
     deliveryLandmark: "",
     notes: "",
     pickupTime: "immediate",
-    pickupDate: getInitialDateTime(), // Set initial value
+    pickupDate: getInitialDateTime(),
     receiverName: "",
     receiverPhone: "",
     amount: 1600,
@@ -56,19 +53,18 @@ const useDispatchForm = () => {
   ) => {
     const { name, value } = e.target;
 
-    // Validate phone number only when it's being entered
-    // if (name === 'receiverPhone') {
-    //   const phoneRegex = /^(\+234|0)[789][01]\d{0,8}$/;
-    //   if (value && !phoneRegex.test(value)) {
-    //     toast.error('Please enter a valid Nigerian phone number');
-    //     return;
-    //   }
-    // }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === 'pickupTime') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value as "immediate" | "scheduled",
+        amount: value === 'scheduled' ? prev.amount - 100 : prev.amount + 100
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleImageChange = (file: File | undefined) => {
