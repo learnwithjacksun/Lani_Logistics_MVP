@@ -17,6 +17,8 @@ export interface DispatchForm {
   receiverPhone: string;
   amount: number;
   deliveryCity: string;
+  paymentType?: 'sender' | 'receiver';
+  isPaid?: boolean;
 }
 
 const useDispatchForm = () => {

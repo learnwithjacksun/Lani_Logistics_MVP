@@ -8,16 +8,20 @@ import toast from "react-hot-toast";
 import useOrder from "../../hooks/useOrder";
 import { STORAGE } from "../../Backend/appwriteConfig";
 import { storage } from "../../Backend/appwriteConfig";
+import { useAuth } from "../../hooks";
 
-const statusColors: Record<OrderStatus, { bg: string; text: string }> = {
+const statusColors: Record<OrderStatus | 'unpaid' | 'paid', { bg: string; text: string }> = {
   'pending': { bg: 'bg-yellow-500/10', text: 'text-yellow-500' },
   'in-transit': { bg: 'bg-blue-500/10', text: 'text-blue-500' },
   'delivered': { bg: 'bg-green-500/10', text: 'text-green-500' },
-  'cancelled': { bg: 'bg-red-500/10', text: 'text-red-500' }
+  'cancelled': { bg: 'bg-red-500/10', text: 'text-red-500' },
+  'unpaid': { bg: 'bg-orange-500/10', text: 'text-orange-500' },
+  'paid': { bg: 'bg-green-500/10', text: 'text-green-500' }
 };
 
 const OrderDetails = () => {
-  const {orders} = useOrder()
+  const { userData } = useAuth();
+  const { orders, updatePaymentStatus } = useOrder();
   const navigate = useNavigate();
   const { orderId } = useParams();
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -30,6 +34,17 @@ const OrderDetails = () => {
     toast.success('Order cancelled successfully');
     setShowCancelModal(false);
     navigate('/history');
+  };
+
+  // Add payment handling
+  const handlePaymentReceived = async () => {
+    if (!order?.$id) return;
+    
+    toast.promise(updatePaymentStatus(order.$id, true), {
+      loading: 'Updating payment status...',
+      success: 'Payment marked as received',
+      error: 'Failed to update payment status'
+    });
   };
 
   if (!order) {
@@ -63,11 +78,19 @@ const OrderDetails = () => {
               <h1 className="text-xl font-bold text-main">Order Details</h1>
               <p className="text-sm text-sub">ID: {order.trackingId}</p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm ${
-              statusColors[order.status as OrderStatus].bg} ${statusColors[order.status as OrderStatus].text
-            }`}>
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-            </span>
+            <div className="flex gap-2">
+              <span className={`px-3 py-1 rounded-full text-sm ${
+                statusColors[order.status as OrderStatus].bg} ${statusColors[order.status as OrderStatus].text
+              }`}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-sm ${
+                statusColors[order.isPaid ? 'paid' : 'unpaid'].bg} ${
+                statusColors[order.isPaid ? 'paid' : 'unpaid'].text
+              }`}>
+                {order.isPaid ? 'Paid' : 'Unpaid'}
+              </span>
+            </div>
           </div>
 
           {/* Cancel Button for Pending Orders */}
@@ -213,6 +236,20 @@ const OrderDetails = () => {
             </div>
           </div>
         </Modal>
+
+        {/* Add to JSX for rider view when payment is pending */}
+        {userData?.role === 'rider' && 
+         order.paymentType === 'receiver' && 
+         !order.isPaid && (
+          <button
+            onClick={handlePaymentReceived}
+            className="w-full mt-4 p-3 border border-primary_1 rounded-xl
+              text-primary_1 bg-primary_1/10 hover:bg-primary_1/20
+              transition-colors text-sm font-medium"
+          >
+            Mark Payment as Received
+          </button>
+        )}
       </div>
     </DashboardLayout>
   );

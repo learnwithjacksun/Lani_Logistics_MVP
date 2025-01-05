@@ -23,6 +23,7 @@ export interface OrderContextType {
   acceptOrder: (orderId: string) => Promise<void>;
   completeOrder: (orderId: string) => Promise<Models.Document>;
   allOrders: Models.Document[];
+  updatePaymentStatus: (orderId: string, isPaid: boolean) => Promise<Models.Document>;
 }
 const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -70,6 +71,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
           senderName: user?.name,
           senderPhone: userData?.phone,
           senderEmail: user?.email,
+          isPaid: data.paymentType === 'sender' ? true : false,
         }
       );
       console.log(response);
@@ -231,6 +233,40 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const updatePaymentStatus = async (orderId: string, isPaid: boolean) => {
+    setIsLoading(true);
+    try {
+      const updatedOrder = await databases.updateDocument(DB, DISPATCH, orderId, {
+        isPaid: isPaid
+      });
+
+      // Update local orders state
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.$id === orderId ? { ...order, isPaid } : order
+        )
+      );
+
+      // Create notification for payment received
+      if (isPaid) {
+        const notification = {
+          type: 'success',
+          title: 'Payment Received',
+          content: `Payment received for order #${updatedOrder.trackingId}`,
+          path: updatedOrder.trackingId
+        };
+        await createNotifications(notification, updatedOrder.senderId);
+      }
+
+      return updatedOrder;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = client.subscribe(
       [`databases.${DB}.collections.${DISPATCH}.documents`],
@@ -256,6 +292,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     allOrders,
     acceptOrder,
     completeOrder,
+    updatePaymentStatus,
   };
 
   return (

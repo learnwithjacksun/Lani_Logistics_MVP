@@ -1,6 +1,6 @@
-// import { useState } from 'react';
+import { useState } from 'react';
 import DashboardLayout from "../../Layouts/DashboardLayout";
-import { Package, MapPin, Clock, ArrowLeft, User } from "lucide-react";
+import { Package, MapPin, Clock, ArrowLeft, User, Wallet } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth, useOrder } from "../../hooks";
 import { DispatchForm } from "../../hooks/useDispatchForm";
@@ -19,7 +19,10 @@ const Payment = ({
   onPaymentClose,
   selectedCity,
 }: PaymentProps) => {
+  const [paymentType, setPaymentType] = useState<'sender' | 'receiver'>('sender');
   const { userData } = useAuth();
+  const { createDispatchOrder } = useOrder();
+
   const componentProps = {
     email: userData?.email,
     amount: deliveryDetails.amount * 100,
@@ -30,17 +33,22 @@ const Payment = ({
     },
     publicKey,
     text: "Pay Now",
-    onSuccess: () => handlePayment(),
+    onSuccess: () => handlePayment(paymentType),
     onClose: () => toast.error("Payment cancelled"),
   };
-  const { createDispatchOrder } = useOrder();
 
-  const handlePayment = async () => {
-    toast.promise(createDispatchOrder(deliveryDetails, selectedCity), {
-      loading: "Creating order...",
-      success: "Order created successfully",
-      error: (error) => error.message,
-    });
+  const handlePayment = async (type: 'sender' | 'receiver') => {
+    toast.promise(
+      createDispatchOrder({
+        ...deliveryDetails,
+        paymentType: type
+      }, selectedCity),
+      {
+        loading: "Creating order...",
+        success: "Order created successfully",
+        error: (error) => error.message,
+      }
+    );
   };
 
   return (
@@ -153,14 +161,68 @@ const Payment = ({
           </div>
         </div>
 
-        {/* Payment Button */}
-        <PaystackButton
-          className="w-full btn btn-primary py-4 rounded-xl text-lg disabled:opacity-50"
-          {...componentProps}
-        />
-        {/* <button onClick={handlePayment} disabled={isLoading}>
-          {isLoading ? "Processing..." : "Pay Now"}
-        </button> */}
+        {/* Payment Options */}
+        <div className="bg-background border border-line rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-line">
+            <h3 className="font-semibold text-main">Payment Options</h3>
+          </div>
+          <div className="p-4 space-y-4">
+            <label 
+              className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer
+                ${paymentType === 'sender' ? 'border-primary_1 bg-primary_1/5' : 'border-line'}`}
+            >
+              <input
+                type="radio"
+                name="paymentType"
+                checked={paymentType === 'sender'}
+                onChange={() => setPaymentType('sender')}
+                className="hidden"
+              />
+              <div className={`p-2 rounded-lg ${paymentType === 'sender' ? 'bg-primary_1/10' : 'bg-background_2'}`}>
+                <Wallet size={20} className={paymentType === 'sender' ? 'text-primary_1' : 'text-sub'} />
+              </div>
+              <div>
+                <h4 className="font-medium text-main">Pay Now</h4>
+                <p className="text-sm text-sub">Sender makes payment immediately</p>
+              </div>
+            </label>
+
+            <label 
+              className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer
+                ${paymentType === 'receiver' ? 'border-primary_1 bg-primary_1/5' : 'border-line'}`}
+            >
+              <input
+                type="radio"
+                name="paymentType"
+                checked={paymentType === 'receiver'}
+                onChange={() => setPaymentType('receiver')}
+                className="hidden"
+              />
+              <div className={`p-2 rounded-lg ${paymentType === 'receiver' ? 'bg-primary_1/10' : 'bg-background_2'}`}>
+                <User size={20} className={paymentType === 'receiver' ? 'text-primary_1' : 'text-sub'} />
+              </div>
+              <div>
+                <h4 className="font-medium text-main">Pay on Delivery</h4>
+                <p className="text-sm text-sub">Receiver pays when package arrives</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {/* Conditional Button Rendering */}
+        {paymentType === 'sender' ? (
+          <PaystackButton
+            className="w-full btn btn-primary py-4 rounded-xl text-lg disabled:opacity-50"
+            {...componentProps}
+          />
+        ) : (
+          <button
+            onClick={() => handlePayment('receiver')}
+            className="w-full btn btn-primary py-4 rounded-xl text-lg"
+          >
+            Create Order
+          </button>
+        )}
       </div>
     </DashboardLayout>
   );

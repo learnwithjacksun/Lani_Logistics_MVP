@@ -9,6 +9,8 @@ import {
   Phone,
   AlertCircle,
   Info,
+  CircleCheckBig,
+  CircleEllipsis,
 } from "lucide-react";
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { getGreeting } from "../../utils/helpers";
@@ -28,16 +30,18 @@ const RiderDashboard = () => {
   const [activeDelivery, setActiveDelivery] = useState<Models.Document>();
 
   const calculateStats = () => {
-    const completedOrders = orders.filter(order => order.status === "delivered");
-    
+    const completedOrders = orders.filter(
+      (order) => order.status === "delivered"
+    );
+
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-    
+
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
-    
+
     const todayEarnings = completedOrders
-      .filter(order => {
+      .filter((order) => {
         const orderDate = new Date(order.$createdAt);
         return orderDate >= todayStart && orderDate <= todayEnd;
       })
@@ -46,9 +50,9 @@ const RiderDashboard = () => {
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - 7);
     weekStart.setHours(0, 0, 0, 0);
-    
+
     const weeklyEarnings = completedOrders
-      .filter(order => new Date(order.$createdAt) >= weekStart)
+      .filter((order) => new Date(order.$createdAt) >= weekStart)
       .reduce((sum, order) => sum + order.price, 0);
 
     const totalDeliveries = completedOrders.length;
@@ -56,7 +60,7 @@ const RiderDashboard = () => {
     return {
       today: todayEarnings,
       week: weeklyEarnings,
-      deliveries: totalDeliveries
+      deliveries: totalDeliveries,
     };
   };
 
@@ -72,8 +76,14 @@ const RiderDashboard = () => {
     (order) => order.status === "in-transit"
   );
 
-  const openCompleteModal = async (order: Models.Document) => {
+  const openCompleteModal = (order: Models.Document) => {
     setActiveDelivery(order);
+    setCheckList({
+      deliveryLocation: false,
+      handedToRecipient: false,
+      confirmedPackage: false,
+      paymentCollected: order.paymentType === 'sender' || order.isPaid || false
+    });
     setShowCompleteModal(true);
   };
   const handleCompleteDelivery = (id: string) => {
@@ -133,6 +143,41 @@ const RiderDashboard = () => {
     time: new Date(notif.$createdAt).toLocaleString(),
   }));
 
+  const checklist = [
+    "Package has been handed over to the recipient",
+    "Recipient has confirmed the package condition",
+    "Delivery location matches the address",
+    ...(activeDelivery?.paymentType === 'receiver' && !activeDelivery?.isPaid 
+      ? ["Payment has been completed"] 
+      : [])
+  ];
+
+  const [checkList, setCheckList] = useState({
+    deliveryLocation: false,
+    handedToRecipient: false,
+    confirmedPackage: false,
+    paymentCollected: activeDelivery?.paymentType === 'sender' || activeDelivery?.isPaid || false
+  });
+
+  const handleChecklist = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCheckList(prev => ({
+      ...prev,
+      [e.target.name]: e.target.checked
+    }))
+  }
+
+  const allChecksComplete = () => {
+    const requiredChecks = activeDelivery?.paymentType === 'receiver' && !activeDelivery?.isPaid
+      ? Object.values(checkList)
+      : Object.values({
+          deliveryLocation: checkList.deliveryLocation,
+          handedToRecipient: checkList.handedToRecipient,
+          confirmedPackage: checkList.confirmedPackage
+        });
+      
+    return requiredChecks.every(value => value === true);
+  };
+
   return (
     <DashboardLayout title={`${getGreeting()}, ${firstName} 👋`}>
       <div className="max-w-3xl mx-auto space-y-6">
@@ -142,22 +187,24 @@ const RiderDashboard = () => {
             <div className="flex items-center gap-3">
               <div
                 className={`w-3 h-3 rounded-full ${
-                  isOnline ? "bg-green-500" : "bg-red-500"
+                  (isOnline && activeDeliveries?.length >= 2) ? "bg-red-500" : isOnline ? "bg-green-500" : "bg-red-500"
                 }`}
               />
               <span className="font-medium text-main">
-                {isOnline ? "Online" : "Offline"}
+                {!(isOnline && activeDeliveries?.length >= 2) ? "Available" : "Busy"}
               </span>
             </div>
             <button
               onClick={handleStatusToggle}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isOnline
+                !(isOnline && activeDeliveries?.length >= 2)
                   ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                  : "bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                  : isOnline
+                  ? "bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                  : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
               }`}
             >
-              Go {isOnline ? "Offline" : "Online"}
+              Go {!(isOnline && activeDeliveries?.length >= 2) ? "Offline" : "Online"}
             </button>
           </div>
         </div>
@@ -241,8 +288,8 @@ const RiderDashboard = () => {
                       <h3 className="font-medium text-main">
                         {activeDelivery?.packageName}
                       </h3>
-                      <p className="text-sm text-sub">
-                        ID: TRK{activeDelivery?.trackingId}
+                      <p className="text-sm font-dm text-sub">
+                        {activeDelivery?.trackingId}
                       </p>
                     </div>
                     <span className="px-3 py-1 text-sm rounded-full bg-blue-500/10 text-blue-500">
@@ -254,11 +301,11 @@ const RiderDashboard = () => {
                     <div className="flex items-start gap-3">
                       <MapPin size={18} className="text-primary_1 mt-1" />
                       <div>
-                        <p className="text-sm text-sub">Pickup</p>
+                        <p className="text-sm font-dm text-sub">Pickup</p>
                         <p className="text-main">
                           {activeDelivery.pickupAddress}
                         </p>
-                        <p className="text-xs text-sub mt-1">
+                        <p className="text-xs font-dm text-sub mt-1">
                           Landmark:{" "}
                           {activeDelivery.pickupLandmark || "Not Provided"}
                         </p>
@@ -267,19 +314,38 @@ const RiderDashboard = () => {
                     <div className="flex items-start gap-3">
                       <MapPin size={18} className="text-primary_2 mt-1" />
                       <div>
-                        <p className="text-sm text-sub">Delivery</p>
+                        <p className="text-sm text-sub font-dm">Delivery</p>
                         <p className="text-main">
                           {activeDelivery.deliveryAddress}
                         </p>
-                        <p className="text-xs text-sub mt-1">
+                        <p className="text-xs font-dm text-sub mt-1">
                           Landmark:{" "}
                           {activeDelivery.deliveryLandmark || "Not Provided"}
                         </p>
                       </div>
                     </div>
                   </div>
+                  {/* payment status */}
+                  <div
+                    className={`flex items-center gap-3 ${
+                      activeDelivery?.isPaid
+                        ? " text-green-500"
+                        : " text-orange-500"
+                    }`}
+                  >
+                    {activeDelivery?.isPaid ? (
+                      <CircleCheckBig size={18} className="text-primary_2" />
+                    ) : (
+                      <CircleEllipsis size={18} className="text-primary_1" />
+                    )}
+                    <span className="text-sm">
+                      {activeDelivery?.isPaid
+                        ? "Payment Completed"
+                        : "Not Paid"}
+                    </span>
+                  </div>
 
-                  <div className="mt-4">
+                  <div className="pt-6">
                     <div className="flex items-center gap-3 mt-2">
                       <a
                         href={`tel:${activeDelivery.senderPhone}`}
@@ -342,19 +408,28 @@ const RiderDashboard = () => {
             <div className="space-y-2">
               <h4 className="font-medium text-main">Delivery Checklist</h4>
               <div className="space-y-3">
-                {[
-                  "Package has been handed over to the recipient",
-                  "Recipient has confirmed the package condition",
-                  "Delivery location matches the address",
-                ].map((item, index) => (
+                {checklist.map((item, index) => (
                   <label
                     key={index}
                     className="flex items-start gap-3 p-3 border border-line rounded-lg cursor-pointer hover:border-primary_1"
                   >
                     <input
                       type="checkbox"
-                      className="mt-1 accent-primary_2"
+                      className="mt-1 accent-primary_1"
                       required
+                      name={
+                        item === "Package has been handed over to the recipient"
+                          ? "handedToRecipient"
+                          : item === "Recipient has confirmed the package condition"
+                          ? "confirmedPackage" 
+                          : item === "Delivery location matches the address"
+                          ? "deliveryLocation"
+                          : item === "Payment has been completed"
+                          ? "paymentCollected"
+                          : undefined
+                      }
+                      checked={checkList[item as keyof typeof checkList]}
+                      onChange={handleChecklist} 
                     />
                     <span className="text-sm text-main">{item}</span>
                   </label>
@@ -371,16 +446,18 @@ const RiderDashboard = () => {
               >
                 Cancel
               </button>
-              <button
-                onClick={() =>
-                  activeDelivery?.$id &&
-                  handleCompleteDelivery(activeDelivery.$id)
-                }
+              {allChecksComplete() && (
+                <button
+                  onClick={() =>
+                    activeDelivery?.$id &&
+                    handleCompleteDelivery(activeDelivery.$id)
+                  }
                 disabled={isLoading || !activeDelivery?.$id}
                 className="flex-1 btn btn-primary py-3 rounded-xl disabled:opacity-50"
               >
                 {isLoading ? "Completing..." : "Complete Delivery"}
               </button>
+              )}
             </div>
           </div>
         </Modal>
@@ -402,7 +479,7 @@ const RiderDashboard = () => {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-main">{activity.text}</p>
-                    <p className="text-xs text-sub">{activity.time}</p>
+                    <p className="text-xs font-dm text-sub">{activity.time}</p>
                   </div>
                 </div>
               ))

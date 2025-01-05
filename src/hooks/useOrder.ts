@@ -8,9 +8,25 @@ const useOrder = () => {
     throw new Error("useOrder must be used within OrderProvider");
   }
 
-  const { createDispatchOrder, isLoading, orders , acceptOrder, allOrders, completeOrder} = context;
+  const { 
+    createDispatchOrder, 
+    isLoading, 
+    orders, 
+    acceptOrder, 
+    allOrders, 
+    completeOrder,
+    updatePaymentStatus 
+  } = context;
 
-  return { createDispatchOrder, isLoading, orders, acceptOrder, allOrders, completeOrder };
+  return { 
+    createDispatchOrder, 
+    isLoading, 
+    orders, 
+    acceptOrder, 
+    allOrders, 
+    completeOrder,
+    updatePaymentStatus 
+  };
 };
 
 export default useOrder;

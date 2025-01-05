@@ -237,11 +237,19 @@ const {orders} = useOrder()
                         <h3 className="font-medium text-main truncate">{order?.packageName}</h3>
                         <p className="text-xs text-sub">ID: {order?.trackingId}</p>
                       </div>
-                      <span className={`shrink-0 px-3 py-1 rounded-full text-sm ${
-                        statusColors[order.status as OrderStatus].bg} ${statusColors[order.status as OrderStatus].text
-                      }`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
+                      <div className="flex gap-2">
+                        <span className={`shrink-0 px-3 py-1 rounded-full text-sm ${
+                          statusColors[order.status as OrderStatus].bg} ${
+                          statusColors[order.status as OrderStatus].text
+                        }`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                        {order.paymentType === 'receiver' && !order.isPaid && (
+                          <span className="shrink-0 px-3 py-1 rounded-full text-sm bg-orange-500/10 text-orange-500">
+                            Pay on Delivery
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
                     <div className="mt-2 text-sm text-sub truncate">

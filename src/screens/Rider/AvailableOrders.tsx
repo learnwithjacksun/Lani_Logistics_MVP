@@ -1,5 +1,7 @@
 import {
   ChevronDown,
+  CircleCheckBig,
+  CircleEllipsis,
   MapPin,
   Package,
   User,
@@ -11,6 +13,11 @@ import useOrder from "../../hooks/useOrder";
 import { STORAGE, storage } from "../../Backend/appwriteConfig";
 import { useState } from "react";
 import { useAuth } from "../../hooks";
+
+const statusColors: Record<'unpaid' | 'paid', { bg: string; text: string }> = {
+  'unpaid': { bg: 'bg-orange-500/10', text: 'text-orange-500' },
+  'paid': { bg: 'bg-green-500/10', text: 'text-green-500' }
+};
 
 const AvailableOrders = () => {
   const { allOrders, acceptOrder, isLoading, orders } = useOrder();
@@ -105,6 +112,11 @@ const AvailableOrders = () => {
                     <p className="text-sm text-sub">ID: {order?.trackingId}</p>
                     <p className="font-medium text-main">
                       ₦{order?.price.toLocaleString()}
+                      {order.paymentType === 'receiver' && (
+                        <span className="ml-2 text-sm text-orange-500 bg-orange-500/10 px-2 py-1 rounded-full">
+                          Collect on Delivery
+                        </span>
+                      )}
                     </p>
                   </div>
                   <div className="text-right">
@@ -183,6 +195,21 @@ const AvailableOrders = () => {
                           </p>
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* payment status */}
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-2 rounded-full text-sm w-full flex items-center gap-2 ${
+                        statusColors[order.isPaid ? 'paid' : 'unpaid'].bg} ${
+                        statusColors[order.isPaid ? 'paid' : 'unpaid'].text
+                      }`}>
+                        {order.isPaid ? (
+                          <CircleCheckBig size={18} className="text-primary_2" />
+                        ) : (
+                          <CircleEllipsis size={18} className="text-primary_1" />
+                        )}
+                        {order.isPaid ? 'Payment Completed' : 'Pay on Delivery'}
+                      </span>
                     </div>
 
                     <button

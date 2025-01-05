@@ -80,7 +80,7 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="flex md:flex-row flex-col gap-2">
+          <div className="flex md:flex-row flex-col gap-2 px-4">
             <Link to="/login" className="btn btn-primary min-h-10 flex-1 rounded-full">
               Login
             </Link>
