@@ -23,6 +23,16 @@ export interface DispatchForm {
 
 const useDispatchForm = () => {
   const [showPayment, setShowPayment] = useState(false);
+
+  // Helper function to get initial date-time string
+  const getInitialDateTime = () => {
+    const now = new Date();
+    // Add 1 hour to current time
+    now.setHours(now.getHours() + 1);
+    // Format to YYYY-MM-DDThh:mm
+    return now.toISOString().slice(0, 16);
+  };
+
   const [formData, setFormData] = useState<DispatchForm>({
     packageName: "",
     packageTexture: "non-breakable",
@@ -32,7 +42,7 @@ const useDispatchForm = () => {
     deliveryLandmark: "",
     notes: "",
     pickupTime: "immediate",
-    pickupDate: "",
+    pickupDate: getInitialDateTime(), // Set initial value
     receiverName: "",
     receiverPhone: "",
     amount: 1600,

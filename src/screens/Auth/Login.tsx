@@ -33,7 +33,7 @@ const Login = () => {
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!formData.email || !formData.password) {
       toast.error("All fields are required");
@@ -51,13 +51,19 @@ const Login = () => {
       return;
     }
 
-    toast.promise(login(formData.email, formData.password, from), {
-      loading: "Logging In...",
-      success: "Login Successful",
-      error: (err) => {
-        return err;
-      },
-    });
+    toast.promise(
+      login(formData.email, formData.password, from),
+      {
+        loading: "Logging In...",
+        success: "Login Successful",
+        error: (error) => {
+          if (error.includes("Invalid credentials")) {
+            return "Invalid email or password";
+          }
+          return error.toString();
+        },
+      }
+    );
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -130,13 +130,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUserData(userData);
 
       if (userData?.role === "rider") {
-        await navigate("/rider-dashboard");
+        navigate("/rider-dashboard");
       } else {
-        await navigate(redirectTo);
+        navigate(redirectTo);
       }
     } catch (error) {
       console.error("Login error:", error);
-      throw new Error((error as Error).message);
+      throw (error as Error).message || "Login failed. Please try again.";
     } finally {
       setLoading(false);
     }

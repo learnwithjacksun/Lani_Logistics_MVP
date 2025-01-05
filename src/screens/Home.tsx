@@ -3,7 +3,24 @@ import { Link } from "react-router-dom";
 import Brand from "../components/Common/Brand";
 import { slides } from "../Constants/data";
 
-
+// Update the slides data
+// const slides = [
+//   {
+//     title: "Fast Delivery",
+//     description: "Get your packages delivered quickly and securely",
+//     image: "/slides/delivery.png"
+//   },
+//   {
+//     title: "Track Orders",
+//     description: "Real-time tracking of your delivery status",
+//     image: "/slides/tracking.png"
+//   },
+//   {
+//     title: "Safe & Secure",
+//     description: "Your packages are in safe hands with our trusted riders",
+//     image: "/slides/secure.png"
+//   }
+// ];
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -57,6 +74,11 @@ const Home = () => {
               >
                 {slides.map((slide, index) => (
                   <div key={index} className="text-center min-w-full">
+                    <img 
+                      src={slide.image} 
+                      alt={slide.title}
+                      className="w-48 h-48 mx-auto mb-6 object-contain"
+                    />
                     <h2 className="text-[30px] font-bold text-main capitalize">
                       {slide.title}
                     </h2>
