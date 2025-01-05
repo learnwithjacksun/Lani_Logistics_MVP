@@ -42,7 +42,7 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
     getUserId();
   }, []);
 
-  const createNotifications = async (
+  const createNotifications = useCallback(async (
     notification: Notification,
     id: string
   ) => {
@@ -69,7 +69,7 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
       console.error(error);
       throw error;
     }
-  };
+  }, []);
 
   const getNotifications = useCallback(async () => {
     try {
@@ -87,7 +87,7 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     getNotifications();
-  }, [getNotifications]);
+  }, [getNotifications, userId, createNotifications]);
 
   useEffect(() => {
     if (notifications) {
