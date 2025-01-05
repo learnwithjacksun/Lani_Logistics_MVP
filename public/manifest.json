@@ -1,25 +1,31 @@
 {
   "short_name": "Lani",
   "name": "Lani Logistics",
+  "description": "Fast & reliable delivery services",
   "icons": [
     {
       "src": "logo-orange.png",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "sizes": "64x64",
+      "type": "image/png"
     },
     {
       "src": "logo-orange.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo-orange.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#FF6B00",
-  "background_color": "#ffffff"
+  "theme_color": "#fa781d",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "/",
+  "prefer_related_applications": false
 } 
