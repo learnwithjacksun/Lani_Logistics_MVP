@@ -10,11 +10,20 @@ const InstallPWA = () => {
   const [supportsPWA, setSupportsPWA] = useState(false);
   const [promptInstall, setPromptInstall] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
     // Check if device is iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
     setIsIOS(isIOSDevice);
+
+    // Check if app is installed
+    const isAppInstalled = 
+      window.matchMedia('(display-mode: standalone)').matches ||
+      ('standalone' in window.navigator && (window.navigator as Navigator & { standalone: boolean }).standalone) ||
+      document.referrer.includes('android-app://');
+    
+    setIsStandalone(isAppInstalled);
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -37,7 +46,7 @@ const InstallPWA = () => {
     }
   };
 
-  if (!supportsPWA && !isIOS) {
+  if (isStandalone || (!supportsPWA && !isIOS)) {
     return null;
   }
 
