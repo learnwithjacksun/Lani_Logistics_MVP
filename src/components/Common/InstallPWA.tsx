@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Share } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -9,8 +9,13 @@ interface BeforeInstallPromptEvent extends Event {
 const InstallPWA = () => {
   const [supportsPWA, setSupportsPWA] = useState(false);
   const [promptInstall, setPromptInstall] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // Check if device is iOS
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIOS(isIOSDevice);
+
     const handler = (e: Event) => {
       e.preventDefault();
       setSupportsPWA(true);
@@ -18,7 +23,6 @@ const InstallPWA = () => {
     };
     
     window.addEventListener('beforeinstallprompt', handler);
-
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
@@ -33,17 +37,26 @@ const InstallPWA = () => {
     }
   };
 
-  if (!supportsPWA) {
+  if (!supportsPWA && !isIOS) {
     return null;
   }
 
   return (
     <button
-      onClick={handleInstallClick}
-      className="fixed bottom-24 right-4 bg-primary_1 text-white p-3 rounded-full shadow-lg hover:bg-primary_1/90 transition-colors"
+      onClick={isIOS ? undefined : handleInstallClick}
+      className="fixed bottom-24 right-4 bg-primary_1 text-white p-3 rounded-full shadow-lg hover:bg-primary_1/90 transition-colors flex items-center gap-2"
     >
-      <Download size={20} />
-      <span className="text-sm">Install App</span>
+      {isIOS ? (
+        <>
+          <Share size={20} />
+          <span className="text-sm">Tap Share → Add to Home Screen</span>
+        </>
+      ) : (
+        <>
+          <Download size={20} />
+          <span className="text-sm">Install App</span>
+        </>
+      )}
     </button>
   );
 };
