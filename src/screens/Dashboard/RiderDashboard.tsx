@@ -179,6 +179,8 @@ const RiderDashboard = () => {
   };
 
   return (
+    <>
+    
     <DashboardLayout title={`${getGreeting()}, ${firstName} 👋`}>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Online Status Toggle */}
@@ -513,6 +515,7 @@ const RiderDashboard = () => {
         </div> */}
       </div>
     </DashboardLayout>
+    </>
   );
 };
 

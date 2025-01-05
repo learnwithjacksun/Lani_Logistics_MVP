@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { getGreeting } from "../../utils/helpers";
 import { useAuth, useOrder, useNotifications } from "../../hooks";
+import InstallPWA from "../../components/Common/InstallPWA";
 
 const services = [
   {
@@ -81,6 +82,8 @@ const Dashboard = () => {
  
 
   return (
+    <>
+    
     <DashboardLayout title={`${getGreeting()}, ${firstName} 👋`}>
       {/* Service Cards */}
       <div className="grid gap-4 mb-8">
@@ -159,6 +162,9 @@ const Dashboard = () => {
         </div>
       </div>
     </DashboardLayout>
+
+    <InstallPWA />  
+    </>
   );
 };
 
