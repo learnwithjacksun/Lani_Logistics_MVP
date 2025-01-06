@@ -1,10 +1,12 @@
 import { Mail, Lock, UserRoundPlus, RefreshCcw } from "lucide-react";
 import AuthLayout from "../../Layouts/AuthLayout";
-import Input from "../../components/Common/Input";
+import { Input, Modal } from "../../components/Common";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks";
 import toast from "react-hot-toast";
+import { account } from "../../Backend/appwriteConfig";
+import { Models } from "appwrite";
 
 interface LoginForm {
   email: string;
@@ -12,25 +14,42 @@ interface LoginForm {
 }
 
 const Login = () => {
-  const { login, loading, user, userData } = useAuth();
+  const { login, loading, userData } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [sessionUserData, setSessionUserData] =
+    useState<Models.User<Models.Preferences> | null>(null);
   const from =
     (location.state as { from?: { pathname: string } })?.from?.pathname ||
     "/dashboard";
-
-  useEffect(() => {
-    if (user && userData) {
-      const path =
-        userData.role === "rider" ? "/rider-dashboard" : "/dashboard";
-      navigate(path, { replace: true });
-    }
-  }, [user, userData, navigate]);
 
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
     password: "",
   });
+
+  // Check for existing session
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const session = await account.get();
+        if (session) {
+          setSessionUserData(session);
+          setShowSessionModal(true);
+        }
+      } catch (error) {
+        // No active session
+        console.log(error);
+      }
+    };
+    checkSession();
+  }, []);
+
+  const handleRedirectToDashboard = () => {
+    const path = userData?.role === "rider" ? "/rider-dashboard" : "/dashboard";
+    navigate(path, { replace: true });
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,19 +70,16 @@ const Login = () => {
       return;
     }
 
-    toast.promise(
-      login(formData.email, formData.password, from),
-      {
-        loading: "Logging In...",
-        success: "Login Successful",
-        error: (error) => {
-          if (error.includes("Invalid credentials")) {
-            return "Invalid email or password";
-          }
-          return error.toString();
-        },
-      }
-    );
+    toast.promise(login(formData.email, formData.password, from), {
+      loading: "Logging In...",
+      success: "Login Successful",
+      error: (error) => {
+        if (error.includes("Invalid credentials")) {
+          return "Invalid email or password";
+        }
+        return error.toString();
+      },
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +103,6 @@ const Login = () => {
           onChange={handleChange}
           placeholder="Enter your email"
           icon={<Mail size={18} />}
-          
         />
 
         <Input
@@ -98,7 +113,6 @@ const Login = () => {
           onChange={handleChange}
           placeholder="Enter your password"
           icon={<Lock size={18} />}
-        
         />
 
         <div className="flex items-center justify-between">
@@ -132,6 +146,35 @@ const Login = () => {
           </Link>
         </div>
       </form>
+      {/* Session Modal */}
+      <Modal
+        isOpen={showSessionModal}
+        onClose={() => setShowSessionModal(false)}
+        title={`${sessionUserData?.name}!`}
+      >
+        <div className="px-4 space-y-10">
+          <p className="text-main text-base">
+            It seems you're already logged in as{" "}
+            <span className="font-semibold text-primary_2">
+              {sessionUserData?.email}
+            </span>
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowSessionModal(false)}
+              className="flex-1 px-4 py-2 border border-line rounded-lg text-main hover:bg-background_2"
+            >
+              Stay Here
+            </button>
+            <button
+              onClick={handleRedirectToDashboard}
+              className="flex-1 px-4 py-2 bg-primary_1 text-white rounded-lg hover:bg-primary_1/90"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </Modal>
     </AuthLayout>
   );
 };

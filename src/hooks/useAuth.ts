@@ -15,6 +15,8 @@ const useAuth = () => {
     login,
     logout,
     updateUserLocation,
+    resetPassword,
+    newPassword,
   } = context;
   return {
     user,
@@ -24,6 +26,8 @@ const useAuth = () => {
     login,
     logout,
     updateUserLocation,
+    resetPassword,
+    newPassword,
   };
 };
 

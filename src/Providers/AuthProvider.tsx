@@ -20,12 +20,18 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   updateUserLocation?: (city: string) => Promise<void>;
   userData: Models.Document | null;
+  resetPassword: (email: string) => Promise<void>;
+  newPassword: (
+    password: string,
+    userId: string,
+    secret: string
+  ) => Promise<void>;
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  const {sendEmail} = useMail();
-  const {createNotifications} = useNotifications();
+  const { sendEmail } = useMail();
+  const { createNotifications } = useNotifications();
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
     null
   );
@@ -67,7 +73,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let accountResponse;
 
     try {
-      
       accountResponse = await account.create(
         ID.unique(),
         email,
@@ -96,14 +101,20 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           await navigate("/dashboard");
         }
       }
-       sendEmail(email, "Welcome to Lani Logistics", "Thank you for registering with us");
+      sendEmail(
+        email,
+        "Welcome to Lani Logistics",
+        "Thank you for registering with us"
+      );
       await createNotifications(
-      {
-        title: "Welcome to Lani Logistics",
-        type: "system",
-        content: "Thank you for registering with us",
-        path: "/dashboard", 
-      }, accountResponse.$id);
+        {
+          title: "Welcome to Lani Logistics",
+          type: "system",
+          content: "Thank you for registering with us",
+          path: "/dashboard",
+        },
+        accountResponse.$id
+      );
     } catch (error) {
       console.error("Registration error:", error);
       throw new Error((error as Error).message);
@@ -162,7 +173,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-
     try {
       const updatedUser = await databases.updateDocument(DB, USERS, user.$id, {
         location: city,
@@ -171,7 +181,40 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await navigate("/rider-dashboard");
     } catch (error) {
       console.error("Update location error:", error);
-      throw error;
+      throw new Error((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    setLoading(true);
+    try {
+      await account.createRecovery(
+        email,
+        `${window.location.origin}/new-password`
+      );
+      toast.success("Reset link sent to email");
+    } catch (error) {
+      console.error("Reset password error:", error);
+      throw new Error((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const newPassword = async (
+    password: string,
+    userId: string,
+    secret: string
+  ) => {
+    setLoading(true);
+    try {
+      await account.updateRecovery(userId, secret, password);
+      await navigate("/login");
+    } catch (error) {
+      console.error("New password error:", error);
+      throw new Error((error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -185,6 +228,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     logout,
     updateUserLocation,
     userData,
+    resetPassword,
+    newPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
