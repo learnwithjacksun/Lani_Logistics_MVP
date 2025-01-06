@@ -147,7 +147,7 @@ const RiderDashboard = () => {
     "Package has been handed over to the recipient",
     "Recipient has confirmed the package condition",
     "Delivery location matches the address",
-    ...(activeDelivery?.paymentType === 'receiver' && !activeDelivery?.isPaid 
+    ...(!activeDelivery?.isPaid 
       ? ["Payment has been completed"] 
       : [])
   ];
@@ -199,14 +199,14 @@ const RiderDashboard = () => {
             <button
               onClick={handleStatusToggle}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                !(isOnline && activeDeliveries?.length >= 2)
+                (isOnline && activeDeliveries?.length >= 2)
                   ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
                   : isOnline
                   ? "bg-green-500/10 text-green-500 hover:bg-green-500/20"
                   : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
               }`}
             >
-              Go {!(isOnline && activeDeliveries?.length >= 2) ? "Offline" : "Online"}
+              Status
             </button>
           </div>
         </div>

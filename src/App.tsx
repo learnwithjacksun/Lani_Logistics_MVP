@@ -6,6 +6,7 @@ import OrderDetails from "./screens/History/OrderDetails";
 import ScrollToTop from "./components/Common/ScrollToTop";
 import { ProtectedRoute } from "./components/Auth";
 import InstallPWA from './components/Common/InstallPWA';
+import { AnimatePresence } from "framer-motion";
 
 const Home = lazy(() => import("./screens/Home"));
 const Login = lazy(() => import("./screens/Auth/Login"));
@@ -131,7 +132,9 @@ const App = () => {
           },
         }}
       />
-      <InstallPWA />
+      <AnimatePresence>
+        <InstallPWA />
+      </AnimatePresence>
     </>
   );
 };

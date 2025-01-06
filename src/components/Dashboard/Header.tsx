@@ -3,10 +3,11 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ThemeToggle from "../Common/ThemeToggle";
 import { useAuth, useNotifications } from "../../hooks";
+import { toast } from "react-hot-toast";
 
 
 const Header = () => {
-  const { userData } = useAuth();
+  const { userData, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -26,8 +27,11 @@ const Header = () => {
   }, []);
 
   const handleLogout = () => {
-    // Add logout logic here
-    navigate('/login');
+   toast.promise(logout(), {
+    loading: "Logging out...",
+    success: "Logged out successfully!",
+      error: ({error}) => error.message,
+    });
   };
 
   return (
