@@ -22,7 +22,8 @@ const InstallPWA = () => {
     const isAppInstalled = 
       window.matchMedia('(display-mode: standalone)').matches ||
       ('standalone' in window.navigator && (window.navigator as Navigator & { standalone: boolean }).standalone) ||
-      document.referrer.includes('android-app://');
+      document.referrer.includes('android-app://') ||
+      localStorage.getItem('pwaInstalled') === 'true';
     
     setIsStandalone(isAppInstalled);
 
@@ -53,6 +54,7 @@ const InstallPWA = () => {
     if (outcome === 'accepted') {
       setSupportsPWA(false);
       setShowModal(false);
+      localStorage.setItem('pwaInstalled', 'true');
     }
   };
 

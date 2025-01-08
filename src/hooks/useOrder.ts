@@ -15,7 +15,9 @@ const useOrder = () => {
     acceptOrder, 
     allOrders, 
     completeOrder,
-    updatePaymentStatus 
+    updatePaymentStatus ,
+    parcelOrders,
+    parcelRevenue
   } = context;
 
   return { 
@@ -25,7 +27,9 @@ const useOrder = () => {
     acceptOrder, 
     allOrders, 
     completeOrder,
-    updatePaymentStatus 
+    updatePaymentStatus,
+    parcelOrders,
+    parcelRevenue      
   };
 };
 

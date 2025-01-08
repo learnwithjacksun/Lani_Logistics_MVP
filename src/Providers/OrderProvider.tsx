@@ -24,6 +24,8 @@ export interface OrderContextType {
   completeOrder: (orderId: string) => Promise<Models.Document>;
   allOrders: Models.Document[];
   updatePaymentStatus: (orderId: string, isPaid: boolean) => Promise<Models.Document>;
+  parcelOrders: Models.Document[];
+  parcelRevenue: number;
 }
 const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -33,6 +35,8 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [orders, setOrders] = useState<Models.Document[]>([]);
   const [allOrders, setAllOrders] = useState<Models.Document[]>([]);
+  const [parcelOrders, setParcelOrders] = useState<Models.Document[]>([]);
+  const [parcelRevenue, setParcelRevenue] = useState(0);
 
   const createDispatchOrder = async (
     data: DispatchForm,
@@ -129,10 +133,26 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user?.$id, userData?.location]);
 
+  const getParcelOrders = useCallback(async()=>{
+    try {
+      const orders = await databases.listDocuments(DB, DISPATCH, [
+        Query.orderDesc("$createdAt"),
+      ]);
+      setParcelOrders(orders.documents);
+      // calculate total revenue
+      const totalRevenue = orders.documents.reduce((acc, order) => acc + order.price, 0);
+      console.log(totalRevenue);
+      setParcelRevenue(totalRevenue);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
   useEffect(() => {
     getUserOrders();
     getAllOrders();
-  }, [getUserOrders, getAllOrders, user?.$id]);
+    getParcelOrders();
+  }, [getUserOrders, getAllOrders, user?.$id, getParcelOrders]);
 
   const acceptOrder = async (orderId: string) => {
     setIsLoading(true);
@@ -278,12 +298,13 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         } else if (event.includes("update")) {
           getAllOrders();
           getUserOrders();
+          getParcelOrders();
         }
       }
     );
 
     return () => unsubscribe();
-  }, [getAllOrders, getUserOrders, orders]);
+  }, [getAllOrders, getUserOrders, getParcelOrders]);
 
   const value: OrderContextType = {
     createDispatchOrder,
@@ -293,6 +314,8 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     acceptOrder,
     completeOrder,
     updatePaymentStatus,
+    parcelOrders,
+    parcelRevenue
   };
 
   return (

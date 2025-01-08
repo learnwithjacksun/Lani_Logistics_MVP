@@ -160,12 +160,7 @@ const Login = () => {
             </span>
           </p>
           <div className="flex gap-3">
-            <button
-              onClick={() => setShowSessionModal(false)}
-              className="flex-1 px-4 py-2 border border-line rounded-lg text-main hover:bg-background_2"
-            >
-              Stay Here
-            </button>
+           
             <button
               onClick={handleRedirectToDashboard}
               className="flex-1 px-4 py-2 bg-primary_1 text-white rounded-lg hover:bg-primary_1/90"

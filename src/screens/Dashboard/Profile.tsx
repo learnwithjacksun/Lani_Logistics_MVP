@@ -1,23 +1,21 @@
-import { Mail, Phone, Edit2, Camera } from "lucide-react";
+import { Mail, Phone, ShieldCheck } from "lucide-react";
 import DashboardLayout from "../../Layouts/DashboardLayout";
-import { useState } from 'react';
+import { useState } from "react";
 import { Modal, Input } from "../../components/Common";
 import { useAuth } from "../../hooks";
 import toast from "react-hot-toast";
-import { databases, DB, STORAGE, storage, USERS } from "../../Backend/appwriteConfig";
-import { useNavigate } from "react-router-dom";
-
+import { databases, DB, USERS } from "../../Backend/appwriteConfig";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
-    const { userData, logout, loading } = useAuth();
-    const fullName = userData?.name;
-    const email = userData?.email;
-    const phone = userData?.phone;
+  const { userData, user, logout, loading } = useAuth();
+  const fullName = userData?.name;
+  const email = userData?.email;
+  const phone = userData?.phone;
+  const isAdmin = user?.labels?.includes("admin");
 
-    const navigate = useNavigate()
-   
   const [showPhoneModal, setShowPhoneModal] = useState(false);
-  const [newPhone, setNewPhone] = useState('');
+  const [newPhone, setNewPhone] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handlePhoneUpdate = async (e: React.FormEvent) => {
@@ -27,127 +25,116 @@ const Profile = () => {
     // Validate phone (Nigerian format)
     const phoneRegex = /^(\+234|0)[789][01]\d{8}$/;
     if (!phoneRegex.test(newPhone)) {
-      toast.error('Please enter a valid Nigerian phone number');
+      toast.error("Please enter a valid Nigerian phone number");
       setIsUpdating(false);
       return;
     }
 
-    if(!userData?.$id) return;
+    if (!userData?.$id) return;
 
     try {
-      await databases.updateDocument(
-        DB,
-        USERS,
-        userData?.$id,
-        { phone: newPhone }
-      );
-      toast.success('Phone number updated successfully');
+      await databases.updateDocument(DB, USERS, userData?.$id, {
+        phone: newPhone,
+      });
+      toast.success("Phone number updated successfully");
       setShowPhoneModal(false);
     } catch (error) {
-        console.log(error);
-      toast.error('Failed to update phone number');
+      console.log(error);
+      toast.error("Failed to update phone number");
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const handleLogout = () => {
-    toast.promise(logout(), {
-      loading: "Logging out...",
-      success: ()=>{
-        navigate("/login")
-        return "Logged out successfully"
-      },
-      error: (error) => {
-        console.log(error);
-        return "Logout failed";
-      },
-    });
-  }
-
   return (
     <DashboardLayout title="Profile">
-      {/* Profile Header */}
-      <div className="bg-background border border-line rounded-xl p-6 text-center relative mb-8">
-        <div className="relative inline-block">
-          <div className="w-24 h-24 rounded-full border-4 border-background overflow-hidden">
-            <img
-              src={storage.getFilePreview(STORAGE, userData?.avatar)}
-              alt="Profile"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = `https://ui-avatars.com/api/?name=${fullName}&background=random`;
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Profile Card */}
+        <div className="bg-background border border-line rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 rounded-full bg-background_2 overflow-hidden">
+              <img
+                src={`https://ui-avatars.com/api/?name=${fullName}&background=random`}
+                alt={fullName}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold text-main">{fullName}</h2>
+                
+              <p className="text-sub text-sm capitalize">{userData?.role}</p>
+              {isAdmin && (
+                  <span className="px-2 py-1 pr-4 bg-orange-500/10 text-primary_1 text-sm font-medium rounded-full inline-flex items-center gap-1">
+                    <ShieldCheck size={16} />
+                    Admin
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Information */}
+        <div className="bg-background border border-line rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-line">
+            <h3 className="font-semibold text-main">Contact Information</h3>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="flex items-start gap-3">
+              <Mail size={18} className="text-primary_1 mt-1" />
+              <div>
+                <p className="text-sub text-sm">Email Address</p>
+                <p className="text-main">{email}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Phone size={18} className="text-primary_1 mt-1" />
+              <div className="flex-1">
+                <p className="text-sub text-sm">Phone Number</p>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-main">{phone}</p>
+                  <button
+                    onClick={() => setShowPhoneModal(true)}
+                    className="text-xs text-primary_1 hover:underline"
+                  >
+                    Change
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Account Actions */}
+        <div className="bg-background border border-line rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-line">
+            <h3 className="font-semibold text-main">Account Actions</h3>
+          </div>
+          <div className="p-4">
+            {isAdmin && (
+              <Link to="/admin" className="btn-secondary py-2 rounded-lg mb-2">
+                Admin Dashboard
+              </Link>
+            )}
+            <button
+              onClick={() => {
+                toast.promise(logout(), {
+                  loading: "Logging out...",
+                  success: "Logged out successfully!",
+                  error: "Failed to logout",
+                });
               }}
-            />
+              disabled={loading}
+              className="w-full p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
+            >
+              {loading ? "Logging out..." : "Log Out"}
+            </button>
           </div>
-          <button className="absolute bottom-0 right-0 p-2 bg-background border border-line rounded-full text-main hover:text-primary_1">
-            <Camera size={16} />
-          </button>
-        </div>
-        <h2 className="text-xl font-semibold text-main mt-4">{fullName}</h2>
-      </div>
-
-      {/* User Information */}
-      <div className="bg-background border border-line rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-line flex items-center justify-between">
-          <h3 className="font-semibold text-main">Personal Information</h3>
-          <button className="p-2 hover:bg-background_2 rounded-full text-sub hover:text-main">
-            <Edit2 size={18} />
-          </button>
-        </div>
-        
-        <div className="divide-y divide-line">
-          <div className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary_1/10">
-              <Mail size={18} className="text-primary_1" />
-            </div>
-            <div>
-              <p className="text-xs text-sub">Email</p>
-              <p className="text-sm text-main">{email}</p>
-            </div>
-          </div>
-
-          <div className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary_1/10">
-              <Phone size={18} className="text-primary_1" />
-            </div>
-            <div>
-              <p className="text-xs text-sub">Phone</p>
-              <p className="text-sm text-main">{phone}</p>
-            </div>
-          </div>
-
-          {/* <div className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary_1/10">
-              <MapPin size={18} className="text-primary_1" />
-            </div>
-            <div>
-              <p className="text-xs text-sub">Address</p>
-              <p className="text-sm text-main">{userInfo.address}</p>
-            </div>
-          </div> */}
         </div>
       </div>
 
-      {/* Account Actions */}
-      <div className="mt-8 space-y-4">
-        <button 
-          onClick={() => setShowPhoneModal(true)}
-          className="w-full p-4 border border-line rounded-xl text-left hover:border-primary_1 text-main bg-background"
-        >
-          Change Phone Number
-        </button>
-        <button 
-          onClick={handleLogout} 
-          disabled={loading} 
-          className="w-full p-4 border border-red-500 rounded-xl text-left hover:border-red-500 text-red-500 bg-red-500/10"
-        >
-          {loading ? "Logging out..." : "Log Out"}
-        </button>
-      </div>
-
-      {/* Phone Change Modal */}
+      {/* Phone Update Modal */}
       <Modal
         isOpen={showPhoneModal}
         onClose={() => setShowPhoneModal(false)}
@@ -185,7 +172,7 @@ const Profile = () => {
               disabled={isUpdating}
               className="px-4 py-2 bg-primary_1 text-white rounded-lg hover:bg-primary_1/90 disabled:opacity-50"
             >
-              {isUpdating ? 'Updating...' : 'Update Phone'}
+              {isUpdating ? "Updating..." : "Update Phone"}
             </button>
           </div>
         </form>

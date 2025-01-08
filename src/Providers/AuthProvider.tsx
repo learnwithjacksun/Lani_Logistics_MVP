@@ -1,7 +1,7 @@
 import { AuthContext } from "../Contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ID, Models } from "appwrite";
+import { ID, Models, Query } from "appwrite";
 import { account, databases, DB, USERS } from "../Backend/appwriteConfig";
 import { useMail, useNotifications } from "../hooks";
 import toast from "react-hot-toast";
@@ -26,6 +26,7 @@ export interface AuthContextType {
     userId: string,
     secret: string
   ) => Promise<void>;
+  users: Models.Document[];
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -37,6 +38,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const [userData, setUserData] = useState<Models.Document | null>(null);
   const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<Models.Document[]>([]);
 
   useEffect(() => {
     checkUser();
@@ -220,6 +222,28 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await databases.listDocuments(DB, USERS, [
+        Query.orderDesc("$createdAt"),
+      ]);
+      console.log(data);
+      setUsers(data.documents);
+    } catch (error) {
+      console.log(error);
+      throw new Error((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  
+
   const value = {
     user,
     loading,
@@ -230,6 +254,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     userData,
     resetPassword,
     newPassword,
+    users,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

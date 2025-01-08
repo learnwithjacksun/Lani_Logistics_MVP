@@ -42,7 +42,7 @@ const Input = ({
           type={inputType}
           className={`
             w-full px-4 py-2 rounded-lg border border-line
-            focus:border-primary_1 bg-background text-main placeholder:text-sub
+            focus:border-primary_1 bg-background text-main placeholder:text-sub placeholder:text-sm
             ${icon ? 'pl-10 text-sub' : ''}
             ${type === 'password' ? 'pr-10' : ''}
             ${error ? 'border-red-500' : ''}
