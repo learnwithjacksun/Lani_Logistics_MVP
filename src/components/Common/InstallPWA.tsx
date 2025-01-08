@@ -27,14 +27,21 @@ const InstallPWA = () => {
     
     setIsStandalone(isAppInstalled);
 
+    let mounted = true;
     const handler = (e: Event) => {
       e.preventDefault();
-      setSupportsPWA(true);
-      setPromptInstall(e as BeforeInstallPromptEvent);
+      if (mounted) {
+        setSupportsPWA(true);
+        setPromptInstall(e as BeforeInstallPromptEvent);
+      }
     };
     
     window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
   }, []);
 
   // Show modal when on dashboard pages

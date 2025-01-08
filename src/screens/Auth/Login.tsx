@@ -2,7 +2,7 @@ import { Mail, Lock, UserRoundPlus, RefreshCcw } from "lucide-react";
 import AuthLayout from "../../Layouts/AuthLayout";
 import { Input, Modal } from "../../components/Common";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../hooks";
 import toast from "react-hot-toast";
 import { account } from "../../Backend/appwriteConfig";
@@ -18,11 +18,9 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showSessionModal, setShowSessionModal] = useState(false);
-  const [sessionUserData, setSessionUserData] =
-    useState<Models.User<Models.Preferences> | null>(null);
-  const from =
-    (location.state as { from?: { pathname: string } })?.from?.pathname ||
-    "/dashboard";
+  const [sessionUserData, setSessionUserData] = useState<Models.User<Models.Preferences> | null>(null);
+  const sessionChecked = useRef(false);
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
 
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
@@ -32,6 +30,7 @@ const Login = () => {
   // Check for existing session
   useEffect(() => {
     const checkSession = async () => {
+      if (sessionChecked.current) return;
       try {
         const session = await account.get();
         if (session) {
@@ -42,7 +41,9 @@ const Login = () => {
         // No active session
         console.log(error);
       }
+      sessionChecked.current = true;
     };
+
     checkSession();
   }, []);
 
