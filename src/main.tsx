@@ -9,11 +9,9 @@ import {
   NotificationProvider,
   EmailProvider,
 } from "./Providers";
-import { initOneSignal } from './utils/oneSignal';
+
 import { HelmetProvider } from 'react-helmet-async';
 
-// Initialize OneSignal
-initOneSignal();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

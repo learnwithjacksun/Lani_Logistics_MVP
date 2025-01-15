@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Modal } from '.';
+
 import { useLocation } from 'react-router-dom';
+import Image from './Image';
+import { Share, X } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -73,63 +75,41 @@ const InstallPWA = () => {
     return null;
   }
 
-  return (
-    <Modal
-      isOpen={showModal}
-      onClose={handleDecline}
-      title="Install Lani App"
-    >
-      <div className="space-y-6 p-4">
+  if(showModal){
+    return (
+      <>
+      <div className='fixed w-full bottom-0 py-2 px-4 shadow-[0_-5px_10px_rgba(0,0,0,0.09)] backdrop-blur-md backdrop-brightness-200 flex justify-between items-center'>
         {isIOS ? (
-          <>
-            <div className="space-y-4">
-              <h3 className="font-medium text-main">Follow these steps to install:</h3>
-              <ol className="space-y-3 text-sm text-main">
-                <li className="flex items-start gap-2">
-                  <span className="font-bold">1.</span>
-                  <p>Tap the Share button in your browser's menu</p>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold">2.</span>
-                  <p>Scroll down and tap "Add to Home Screen"</p>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold">3.</span>
-                  <p>Tap "Add" to confirm</p>
-                </li>
-              </ol>
-            </div>
-            <div className="flex justify-end">
-              <button 
-                onClick={handleDecline}
-                className="px-4 py-2 text-sm font-medium text-main bg-background_2 rounded-lg hover:bg-background_2/80"
-              >
-                Got it
-              </button>
-            </div>
-          </>
+          <div className='flex items-center gap-2 '>
+            <Image src='/logo-orange.png' alt='Lani Logo' width={30} height={30}/>
+           <div>
+            <p className='text-sm text-main'>For quick and easy access anytime,</p>
+            <p className='flex items-center gap-1 text-sm text-main'>
+              <span className='text-main'>Click on the share icon</span>
+              <Share size={16}/>,
+            </p>
+            <p className='text-sm text-main'>then <b>Add home screen</b></p>
+           </div>
+          </div>
         ) : (
-          <>
-            <p className="text-main">Install Lani for a better experience with quick access and offline features.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleDecline}
-                className="flex-1 px-4 py-2 border border-line rounded-lg text-main hover:bg-background_2"
-              >
-                Not now
-              </button>
-              <button
-                onClick={handleInstallClick}
-                className="flex-1 px-4 py-2 bg-primary_1 text-white rounded-lg hover:bg-primary_1/90"
-              >
-                Install
-              </button>
+          <div className='flex items-center justify-between gap-2 w-full'>
+              <div className='flex items-center gap-2 '>
+              <Image src='/logo-orange.png' alt='Lani Logo' width={30} height={30}/>
+              <p className='text-sm text-main'>Install App for quick access</p>
             </div>
-          </>
+            <button onClick={handleInstallClick} className='btn-primary px-2 py-1 rounded-md'>Install</button>
+          </div>
         )}
+       
+        <button onClick={handleDecline} className=' px-2 py-1 text-main rounded-md'>
+          <X size={20}/>
+        </button>
       </div>
-    </Modal>
-  );
+      </>
+    );
+  }
+
+  return null;
 };
 
 export default InstallPWA; 
