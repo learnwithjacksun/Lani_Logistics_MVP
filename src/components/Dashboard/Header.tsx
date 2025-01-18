@@ -38,8 +38,7 @@ const Header = () => {
     <header className="sticky top-0 backdrop-blur-sm z-20">
       <div className="layout py-4 flex justify-between items-center">
         {pathname === '/dashboard' || pathname === '/rider-dashboard' ? (
-          // <img src="/logo-orange.png" alt="Lani" className="w-10 h-10" />
-          <div/>
+          <img src="/logo-orange.png" alt="Lani" className="w-10 h-10" />
         ) : (
           <button 
             onClick={() => navigate(-1)}
