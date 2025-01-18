@@ -1,4 +1,16 @@
-import { MapPin, Package, ArrowRight, CheckCircle2, ChevronDown, ImageIcon, X, Clock, User, Phone } from "lucide-react";
+import {
+  MapPin,
+  Package,
+  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
+  ImageIcon,
+  X,
+  Clock,
+  User,
+  Phone,
+  Info,
+} from "lucide-react";
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { Input } from "../../components/Common";
 import { useDispatchForm } from "../../hooks";
@@ -7,10 +19,15 @@ import toast from "react-hot-toast";
 import { City } from "../../types/dispatch";
 import Payment from "./Payment";
 import ScrollToTop from "../../components/Common/ScrollToTop";
+import PlacesAutocomplete, {
+  geocodeByAddress,
+  // geocodeByPlaceId,
+  getLatLng,
+} from "react-places-autocomplete";
 
 const cities: City[] = [
   { name: "Uyo", state: "Akwa Ibom", basePrice: 1600 },
-  { name: "Port Harcourt", state: "Rivers", basePrice: 2500 }
+  { name: "Port Harcourt", state: "Rivers", basePrice: 2500 },
 ];
 
 const Dispatch = () => {
@@ -21,18 +38,20 @@ const Dispatch = () => {
     setFormData,
     handleSubmit,
     showPayment,
-    setShowPayment
+    setShowPayment,
   } = useDispatchForm();
 
   const [selectedCity, setSelectedCity] = useState<City>(cities[0]);
- 
+
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const [deliveryAddress, setDeliveryAddress] = useState<string>('');
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size should be less than 5MB');
+        toast.error("Image size should be less than 5MB");
         return;
       }
       const reader = new FileReader();
@@ -46,14 +65,13 @@ const Dispatch = () => {
 
   const handleCitySelect = (city: City) => {
     setSelectedCity(city);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       amount: city.basePrice,
-      deliveryCity: city.name
+      deliveryCity: city.name,
     }));
   };
 
-  
   const handlePaymentClose = () => {
     setShowPayment(false);
   };
@@ -63,13 +81,52 @@ const Dispatch = () => {
     handleFormImageChange(undefined);
   };
 
-  if (showPayment) {
+  const handleAddressChange = (address: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      pickupAddress: address,
+    }));
+  };
 
+  const handleSelect = async (address: string) => {
+    const results = await geocodeByAddress(address);
+    const latLng = await getLatLng(results[0]);
+    handleAddressSelect(address, latLng.lat, latLng.lng);
+  };
+
+  const handleAddressSelect = (address: string, lat: number, lon: number) => {
+    console.log(
+      `Selected Address: ${address}, Latitude: ${lat}, Longitude: ${lon}`
+    );
+    setFormData((prev) => ({
+      ...prev,
+      pickupAddress: address,
+      // pickupLatitude: lat,
+      // pickupLongitude: lon,
+    }));
+  };
+
+  const handleDeliveryAddressChange = (address: string) => {
+    setDeliveryAddress(address);
+    setFormData((prev) => ({
+      ...prev,
+      deliveryAddress: address,
+    }));
+  };
+
+  const handleDeliverySelect = async (address: string) => {
+    const results = await geocodeByAddress(address);
+    const latLng = await getLatLng(results[0]);
+    console.log(`Selected Delivery Address: ${address}, Latitude: ${latLng.lat}, Longitude: ${latLng.lng}`);
+    handleDeliveryAddressChange(address);
+  };
+
+  if (showPayment) {
     return (
       <>
-      <ScrollToTop/>
-        <Payment 
-          deliveryDetails={formData}  
+        <ScrollToTop />
+        <Payment
+          deliveryDetails={formData}
           onPaymentClose={handlePaymentClose}
           selectedCity={selectedCity.name}
         />
@@ -83,7 +140,9 @@ const Dispatch = () => {
       <div className="max-w-full mx-auto">
         {/* City Selection */}
         <div className="mb-8">
-          <h4 className="text-sm font-medium text-sub mb-4">Select your city</h4>
+          <h4 className="text-sm font-medium text-sub mb-4">
+            Select your city
+          </h4>
           <div className="grid grid-cols-2 gap-4">
             {cities.map((city) => (
               <button
@@ -91,20 +150,22 @@ const Dispatch = () => {
                 type="button"
                 onClick={() => handleCitySelect(city)}
                 className={`group relative p-6 border rounded-2xl text-left transition-all ${
-                  selectedCity.name === city.name 
-                    ? "border-primary_1 bg-primary_1/5" 
+                  selectedCity.name === city.name
+                    ? "border-primary_1 bg-primary_1/5"
                     : "border-line hover:border-primary_1"
                 }`}
               >
-                <CheckCircle2 
-                  size={20} 
-                  className={`absolute top-4 right-4 transition-all ${
+                <CheckCircle2
+                  size={20}
+                  className={`absolute top-2 right-2 transition-all ${
                     selectedCity.name === city.name
-                      ? "text-primary_1 scale-110" 
+                      ? "text-primary_1 scale-110"
                       : "text-line group-hover:text-sub"
                   }`}
                 />
-                <h3 className="font-semibold text-base text-main">{city.name}</h3>
+                <h3 className="font-semibold text-base text-main">
+                  {city.name}
+                </h3>
               </button>
             ))}
           </div>
@@ -113,15 +174,19 @@ const Dispatch = () => {
         {/* Delivery Form */}
         <div className=" md:border border-line rounded-2xl overflow-hidden">
           <div className="md:px-6 py-4 border-b border-line">
-            <h3 className="font-semibold text-xl text-main">Delivery Details</h3>
-            <p className="text-sub text-sm mt-1 font-dm">Fill in the delivery information</p>
+            <h3 className="font-semibold text-xl text-main">
+              Delivery Details
+            </h3>
+            <p className="text-sub text-sm mt-1 font-dm">
+              Fill in the delivery information
+            </p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="md:px-6 py-6 space-y-8">
             {/* Locations */}
             <div className="relative">
               {/* <div className="absolute left-[17px] top-[76px] bottom-4 w-[2px] bg-line" /> */}
-              
+
               {/* Pickup Location */}
               <div className="relative space-y-4">
                 <h4 className="text-sm font-medium text-main flex items-center gap-2">
@@ -130,14 +195,49 @@ const Dispatch = () => {
                   </div>
                   Pickup Location
                 </h4>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Input
-                    label="Address"
-                    name="pickupAddress"
+                <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
+                  <PlacesAutocomplete
                     value={formData.pickupAddress}
-                    placeholder={`Enter pickup address in ${selectedCity.name}`}
-                    onChange={handleChange}
-                  />
+                    onChange={(address) => handleAddressChange(address)}
+                    onSelect={handleSelect}
+                  >
+                    {({
+                      getInputProps,
+                      suggestions,
+                      getSuggestionItemProps,
+                      loading,
+                    }) => (
+                      <div className="relative">
+                        <div className="w-full">
+                          <label className="block text-sm text-sub font-medium mb-1">
+                            Pickup Address
+                          </label>
+                          <input
+                            className="w-full px-4 py-2 rounded-lg border border-line focus:border-primary_1 bg-background text-main placeholder:text-sub placeholder:text-sm"
+                            name="pickupAddress"
+                            {...getInputProps({
+                              placeholder: `Enter pickup address in ${selectedCity.name}`,
+                            })}
+                          />
+                        </div>
+
+                        {loading && <div>Loading...</div>}
+                        <ul className="absolute top-full left-0 w-full bg-background z-10">
+                          {suggestions.map((suggestion) => (
+                            <li
+                              {...getSuggestionItemProps(suggestion)}
+                              key={suggestion.placeId}
+                              className="p-2 border-b border-line text-main flex items-center gap-2"
+                            >
+                              <MapPin size={16} className="text-sub" />
+                              <span className="text-sm">{suggestion.description}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </PlacesAutocomplete>
+
                   <Input
                     label="Landmark (Optional)"
                     name="pickupLandmark"
@@ -156,19 +256,53 @@ const Dispatch = () => {
                   </div>
                   Delivery Location
                 </h4>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Input
-                    label="Address"
-                    placeholder="Enter delivery address"
-                    name="deliveryAddress"
-                    value={formData.deliveryAddress}
-                    onChange={handleChange}
-                  />
+                <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
+                  <PlacesAutocomplete
+                    value={deliveryAddress}
+                    onChange={handleDeliveryAddressChange}
+                    onSelect={handleDeliverySelect}
+                  >
+                    {({
+                      getInputProps,
+                      suggestions,
+                      getSuggestionItemProps,
+                      loading,
+                    }) => (
+                      <div className="relative">
+                        <div className="w-full">
+                          <label className="block text-sm text-sub font-medium mb-1">
+                            Delivery Address
+                          </label>
+                          <input
+                            className="w-full px-4 py-2 rounded-lg border border-line focus:border-primary_1 bg-background text-main placeholder:text-sub placeholder:text-sm"
+                            {...getInputProps({
+                              placeholder: `Enter delivery address`,
+                            })}
+                          />
+                        </div>
+
+                        {loading && <div>Loading...</div>}
+                        <ul className="absolute top-full left-0 w-full bg-background z-10">
+                          {suggestions.map((suggestion) => (
+                            <li
+                              {...getSuggestionItemProps(suggestion)}
+                              key={suggestion.placeId}
+                              className="p-2 border-b border-line text-main flex items-center gap-2"
+                            >
+                              <MapPin size={16} className="text-sub" />
+                              <span className="text-sm">{suggestion.description}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </PlacesAutocomplete>
+
                   <Input
                     label="Landmark (Optional)"
-                    placeholder="Nearest landmark"
                     name="deliveryLandmark"
                     value={formData.deliveryLandmark}
+                    placeholder="Nearest landmark"
                     onChange={handleChange}
                   />
                 </div>
@@ -183,7 +317,7 @@ const Dispatch = () => {
                 </div>
                 Package Details
               </h4>
-              
+
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
                   <Input
@@ -210,9 +344,9 @@ const Dispatch = () => {
                         <option value="breakable">Breakable</option>
                         <option value="perishable">Perishable</option>
                       </select>
-                      <ChevronDown 
-                        size={18} 
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-sub pointer-events-none" 
+                      <ChevronDown
+                        size={18}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-sub pointer-events-none"
                       />
                     </div>
                   </div>
@@ -240,8 +374,12 @@ const Dispatch = () => {
                         >
                           <ImageIcon size={24} className="text-sub" />
                           <div className="text-center">
-                            <p className="text-main text-sm font-medium">Add Package Image</p>
-                            <p className="text-sub text-xs">PNG, JPG or JPEG (max. 5MB)</p>
+                            <p className="text-main text-sm font-medium">
+                              Add Package Image
+                            </p>
+                            <p className="text-sub text-xs">
+                              PNG, JPG or JPEG (max. 5MB)
+                            </p>
                           </div>
                         </label>
                       ) : (
@@ -283,7 +421,7 @@ const Dispatch = () => {
                 </div>
                 Receiver Details
               </h4>
-              
+
               <div className="grid gap-4 md:grid-cols-2">
                 <Input
                   label="Receiver's Name"
@@ -292,7 +430,6 @@ const Dispatch = () => {
                   onChange={handleChange}
                   placeholder="Enter receiver's name"
                   icon={<User size={18} />}
-                  
                 />
 
                 <Input
@@ -303,7 +440,6 @@ const Dispatch = () => {
                   onChange={handleChange}
                   placeholder="Enter receiver's phone number"
                   icon={<Phone size={18} />}
-                  
                 />
               </div>
             </div>
@@ -313,16 +449,18 @@ const Dispatch = () => {
               <h3 className="font-medium text-main">Price Summary</h3>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-sub">Base Price</span>
-                {formData.pickupTime === 'scheduled' ? (
+                {formData.pickupTime === "scheduled" ? (
                   <div className="text-right">
-                    <span className="line-through text-sub">₦{selectedCity.basePrice}</span>
+                    <span className="line-through text-sub">
+                      ₦{selectedCity.basePrice}
+                    </span>
                     <span className="text-main ml-2">₦{formData.amount}</span>
                   </div>
                 ) : (
                   <span className="text-main">₦{formData.amount}</span>
                 )}
               </div>
-              {formData.pickupTime === 'scheduled' && (
+              {formData.pickupTime === "scheduled" && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-sub">Scheduled Delivery Discount</span>
                   <span className="text-red-500">-₦100</span>
@@ -331,6 +469,10 @@ const Dispatch = () => {
               <div className="pt-2 border-t border-line flex items-center justify-between font-medium">
                 <span className="text-main">Total</span>
                 <span className="text-primary_1">₦{formData.amount}</span>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <Info size={18} className="text-orange-500" />
+                <p className="text-sm text-sub">Promo Prices 🎉</p>
               </div>
             </div>
 
@@ -347,40 +489,50 @@ const Dispatch = () => {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <label className="flex-1 border border-line rounded-lg p-4 flex items-center gap-3 cursor-pointer
+                  <label
+                    className="flex-1 border border-line rounded-lg p-4 flex items-center gap-3 cursor-pointer
                     ${formData.pickupTime === 'immediate' ? 'border-primary_1' : 'border-line hover:border-primary_1'}"
                   >
                     <input
                       type="radio"
                       name="pickupTime"
                       value="immediate"
-                      checked={formData.pickupTime === 'immediate'}
+                      checked={formData.pickupTime === "immediate"}
                       onChange={handleChange}
                       className="hidden"
                     />
-                    <CheckCircle2 
-                      size={20} 
-                      className={formData.pickupTime === 'immediate' ? 'text-primary_1' : 'text-sub'} 
+                    <CheckCircle2
+                      size={20}
+                      className={
+                        formData.pickupTime === "immediate"
+                          ? "text-primary_1"
+                          : "text-sub"
+                      }
                     />
                     <div className="text-left">
                       <h3 className="font-medium text-main">Immediate</h3>
                     </div>
                   </label>
 
-                  <label className="flex-1 border border-line rounded-lg p-4 flex items-center gap-3 cursor-pointer
+                  <label
+                    className="flex-1 border border-line rounded-lg p-4 flex items-center gap-3 cursor-pointer
                     ${formData.pickupTime === 'scheduled' ? 'border-primary_1' : 'border-line hover:border-primary_1'}"
                   >
                     <input
                       type="radio"
                       name="pickupTime"
                       value="scheduled"
-                      checked={formData.pickupTime === 'scheduled'}
+                      checked={formData.pickupTime === "scheduled"}
                       onChange={handleChange}
                       className="hidden"
                     />
-                    <CheckCircle2 
-                      size={20} 
-                      className={formData.pickupTime === 'scheduled' ? 'text-primary_1' : 'text-sub'} 
+                    <CheckCircle2
+                      size={20}
+                      className={
+                        formData.pickupTime === "scheduled"
+                          ? "text-primary_1"
+                          : "text-sub"
+                      }
                     />
                     <div className="text-left">
                       <h3 className="font-medium text-main">Schedule</h3>
@@ -388,7 +540,7 @@ const Dispatch = () => {
                   </label>
                 </div>
 
-                {formData.pickupTime === 'scheduled' && (
+                {formData.pickupTime === "scheduled" && (
                   <div>
                     <Input
                       type="datetime-local"
@@ -406,7 +558,7 @@ const Dispatch = () => {
             </div>
 
             {/* Submit Button */}
-            <button 
+            <button
               type="submit"
               className="w-full flex items-center justify-center gap-2 btn btn-primary py-4 rounded-xl text-lg mt-6"
             >

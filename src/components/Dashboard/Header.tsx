@@ -36,13 +36,14 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 backdrop-blur-sm z-20">
-      <div className="layout line py-4 flex justify-between items-center">
+      <div className="layout py-4 flex justify-between items-center">
         {pathname === '/dashboard' || pathname === '/rider-dashboard' ? (
-          <img src="/logo-orange.png" alt="Lani" className="w-10 h-10" />
+          // <img src="/logo-orange.png" alt="Lani" className="w-10 h-10" />
+          <div/>
         ) : (
           <button 
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-background_2 rounded-full"
+            className="p-2 bg-background hover:bg-background_2 rounded-full"
           >
             <ArrowLeft size={20} className="text-main" />
           </button>

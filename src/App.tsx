@@ -7,7 +7,7 @@ import ScrollToTop from "./components/Common/ScrollToTop";
 import { ProtectedRoute } from "./components/Auth";
 import InstallPWA from "./components/Common/InstallPWA";
 import { AnimatePresence } from "framer-motion";
-
+import GoogleApiLoader from "./components/GoogleApiLoader";
 const Home = lazy(() => import("./screens/Home"));
 const Login = lazy(() => import("./screens/Auth/Login"));
 const Register = lazy(() => import("./screens/Auth/Register"));
@@ -39,6 +39,7 @@ const App = () => {
   return (
     <>
       <ScrollToTop />
+      <GoogleApiLoader />
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<Home />} />

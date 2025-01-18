@@ -36,6 +36,7 @@ const Login = () => {
         if (session) {
           setSessionUserData(session);
           setShowSessionModal(true);
+          navigate(from, { replace: true });
         }
       } catch (error) {
         // No active session
