@@ -17,4 +17,4 @@ const AnnouncementSlide = () => {
   );
 };
 
-export default AnnouncementSlide;
+export default AnnouncementSlide

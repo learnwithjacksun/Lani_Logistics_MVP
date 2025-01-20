@@ -102,6 +102,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           await navigate("/dashboard");
         }
+      } else {
+        await navigate("/login");
+        toast.error("User already exists");
       }
       sendEmail(
         email,
