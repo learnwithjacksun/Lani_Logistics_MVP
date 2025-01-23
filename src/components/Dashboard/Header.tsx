@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Settings, LogOut, Bell } from "lucide-react";
+import { ArrowLeft, User, LogOut, Bell } from "lucide-react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ThemeToggle from "../Common/ThemeToggle";
@@ -91,13 +91,13 @@ const Header = () => {
                   Profile
                 </Link>
                 
-                <Link 
+                {/* <Link 
                   to="/settings"
                   className="w-full px-4 py-2 text-sm hover:bg-background_2 flex items-center gap-2 text-main"
                 >
                   <Settings size={16} />
                   Settings
-                </Link>
+                </Link> */}
                 
                 <div className="border-t border-line my-1" />
                 

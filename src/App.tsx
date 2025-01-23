@@ -47,79 +47,26 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/reset" element={<Reset />} />
           <Route path="/new-password" element={<NewPassword />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute allowedRole="customer">
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dispatch"
-            element={
-              <ProtectedRoute allowedRole="customer">
-                <Dispatch />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <ProtectedRoute>
-                <History />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/history/:orderId" element={<OrderDetails />} />
-          <Route path="/notifications" element={<Notifications />} />
           <Route path="/location" element={<RiderLocation />} />
-          <Route
-            path="/rider-dashboard"
-            element={
-              <ProtectedRoute allowedRole="rider">
-                <RiderDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/available-orders"
-            element={
-              <ProtectedRoute allowedRole="rider">
-                <AvailableOrders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pending-orders"
-            element={
-              <ProtectedRoute allowedRole="customer">
-                <PendingOrders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/active-orders"
-            element={
-              <ProtectedRoute allowedRole="customer">
-                <ActiveOrders />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/admin">
-            <Route index element={<Overview />} />
-            <Route path="users" element={<Users />} />
-            <Route path="users/:userId" element={<UserDetails />} />
-            <Route path="orders" element={<ParcelOrders />} />
-            <Route path="orders/:orderId" element={<ParcelOrderDetails />} />
+
+          <Route element={<ProtectedRoute/>}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/dispatch" element={<Dispatch />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/history/:orderId" element={<OrderDetails />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/rider-dashboard" element={<RiderDashboard />} />
+            <Route path="/available-orders" element={<AvailableOrders />} />
+            <Route path="/pending-orders" element={<PendingOrders />} />
+            <Route path="/active-orders" element={<ActiveOrders />} />
+            <Route path="/admin">
+              <Route index element={<Overview />} />
+              <Route path="users" element={<Users />} />
+              <Route path="users/:userId" element={<UserDetails />} />
+              <Route path="orders" element={<ParcelOrders />} />
+              <Route path="orders/:orderId" element={<ParcelOrderDetails />} />
+            </Route>
           </Route>
           <Route path="/food" element={<Food />} />
           <Route path="*" element={<NotFound />} />

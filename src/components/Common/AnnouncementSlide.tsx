@@ -7,7 +7,7 @@ const AnnouncementSlide = () => {
 
   return (
     <div className="bg-orange-500/10 overflow-hidden whitespace-nowrap w-full h-8 flex items-center gap-2">
-      <div className="h-full min-w-9 z-10 flex items-center text-primary_1 justify-center border-r border-orange-500/20 backdrop-blur-md">
+      <div className="h-full min-w-9 z-10 flex items-center text-primary_1 justify-center backdrop-blur-md">
         <MessageCircleWarning size={20}  />
       </div>
       <div className="announcement-text">

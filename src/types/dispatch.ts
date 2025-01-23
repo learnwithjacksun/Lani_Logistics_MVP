@@ -1,7 +1,7 @@
 export interface City {
   name: string;
   state: string;
-  basePrice: number;
+  rate: number;
 }
 
 export interface DeliveryLocation {

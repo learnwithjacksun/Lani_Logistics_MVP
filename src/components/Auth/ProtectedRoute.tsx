@@ -1,27 +1,16 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  allowedRole?: 'customer' | 'rider';
-}
+const ProtectedRoute = () => {
+  const { user } = useAuth();
+  // const location = useLocation();
+  // const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
 
-const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
-  const { user, userData } = useAuth();
-  const location = useLocation();
+  // const redirectPath = userData?.role === 'rider' ? '/rider-dashboard' : '/dashboard';
 
-  
+  console.log(user);
 
-  if (!user || !userData) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (allowedRole && userData.role !== allowedRole) {
-    const redirectPath = userData.role === 'rider' ? '/rider-dashboard' : '/dashboard';
-    return <Navigate to={redirectPath} replace />;
-  }
-
-  return <>{children}</>;
+ return user? <Outlet/> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute; 

@@ -40,29 +40,30 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<Models.Document[]>([]);
 
-  useEffect(() => {
-    checkUser();
-  }, []);
 
-  const checkUser = async () => {
+  const checkUser = useCallback(async () => {
     try {
       const accountDetails = await account.get();
+      setUser(accountDetails);
+
       if (accountDetails) {
         const userData = await databases.getDocument(
           DB,
           USERS,
           accountDetails.$id
         );
-        setUser(accountDetails);
         setUserData(userData);
       }
     } catch (error) {
       console.log(error);
       setUser(null);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
+
+  
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
 
   const register = async (
     email: string,
@@ -116,7 +117,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Welcome to Lani Logistics",
           type: "system",
           content: "Thank you for registering with us",
-          path: "/dashboard",
+          path: "dashboard",
         },
         accountResponse.$id
       );
@@ -166,6 +167,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUserData(null);
     } catch (error) {
       console.error("Logout error:", error);
+      throw new Error((error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -244,8 +246,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
-  
 
   const value = {
     user,

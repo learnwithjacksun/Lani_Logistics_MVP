@@ -171,7 +171,7 @@ const Register = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Create a password"
+          placeholder="Minimum 8 characters"
           icon={<Lock size={18} />}
           required
         />

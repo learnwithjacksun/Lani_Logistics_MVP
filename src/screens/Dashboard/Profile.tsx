@@ -5,7 +5,7 @@ import { Modal, Input } from "../../components/Common";
 import { useAuth } from "../../hooks";
 import toast from "react-hot-toast";
 import { databases, DB, USERS } from "../../Backend/appwriteConfig";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { userData, user, logout, loading } = useAuth();
@@ -13,6 +13,9 @@ const Profile = () => {
   const email = userData?.email;
   const phone = userData?.phone;
   const isAdmin = user?.labels?.includes("admin");
+  // const isAdmin = false;
+  console.log(isAdmin)
+  console.log(userData);
 
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [newPhone, setNewPhone] = useState("");
@@ -44,6 +47,18 @@ const Profile = () => {
     } finally {
       setIsUpdating(false);
     }
+  };
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    toast.promise(logout(), {
+      loading: "Logging out...",
+      success: () => {
+        navigate("/login");
+        return "Logged out successfully!";
+      },
+      error: (error) => (error as Error).message,
+    });
   };
 
   return (
@@ -118,13 +133,7 @@ const Profile = () => {
               </Link>
             )}
             <button
-              onClick={() => {
-                toast.promise(logout(), {
-                  loading: "Logging out...",
-                  success: "Logged out successfully!",
-                  error: "Failed to logout",
-                });
-              }}
+              onClick={handleLogout}
               disabled={loading}
               className="w-full p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
             >

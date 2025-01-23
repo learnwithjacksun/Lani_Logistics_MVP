@@ -28,11 +28,14 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log(userId)
+
   useEffect(() => {
     const getUserId = async () => {
       try {
         const user = await account.get();
         const userId = user?.$id;
+        console.log(user)
         setUserId(userId);
       } catch (error) {
         console.error(error);

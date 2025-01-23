@@ -2,11 +2,9 @@ import { Mail, Lock, UserRoundPlus, RefreshCcw } from "lucide-react";
 import AuthLayout from "../../Layouts/AuthLayout";
 import { Input, Modal } from "../../components/Common";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks";
 import toast from "react-hot-toast";
-import { account } from "../../Backend/appwriteConfig";
-import { Models } from "appwrite";
 
 interface LoginForm {
   email: string;
@@ -14,39 +12,26 @@ interface LoginForm {
 }
 
 const Login = () => {
-  const { login, loading, userData } = useAuth();
+  const { login, loading, userData, user } = useAuth();
+  console.log(user);
   const location = useLocation();
   const navigate = useNavigate();
   const [showSessionModal, setShowSessionModal] = useState(false);
-  const [sessionUserData, setSessionUserData] = useState<Models.User<Models.Preferences> | null>(null);
-  const sessionChecked = useRef(false);
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    "/dashboard";
 
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
     password: "",
   });
 
-  // Check for existing session
   useEffect(() => {
-    const checkSession = async () => {
-      if (sessionChecked.current) return;
-      try {
-        const session = await account.get();
-        if (session) {
-          setSessionUserData(session);
-          setShowSessionModal(true);
-          navigate(from, { replace: true });
-        }
-      } catch (error) {
-        // No active session
-        console.log(error);
-      }
-      sessionChecked.current = true;
-    };
-
-    checkSession();
-  }, []);
+    if (user) {
+      setShowSessionModal(true);
+      navigate(from, { replace: true });
+    }
+  }, [from, navigate, user]);
 
   const handleRedirectToDashboard = () => {
     const path = userData?.role === "rider" ? "/rider-dashboard" : "/dashboard";
@@ -113,7 +98,7 @@ const Login = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Enter your password"
+          placeholder="Minimum 8 characters"
           icon={<Lock size={18} />}
         />
 
@@ -152,17 +137,16 @@ const Login = () => {
       <Modal
         isOpen={showSessionModal}
         onClose={() => setShowSessionModal(false)}
-        title={`${sessionUserData?.name}!`}
+        title={`Hello ${userData?.name?.split(" ")[0]}!`}
       >
         <div className="px-4 space-y-10">
           <p className="text-main text-base">
             It seems you're already logged in as{" "}
             <span className="font-semibold text-primary_2">
-              {sessionUserData?.email}
+              {userData?.email}
             </span>
           </p>
           <div className="flex gap-3">
-           
             <button
               onClick={handleRedirectToDashboard}
               className="flex-1 px-4 py-2 bg-primary_1 text-white rounded-lg hover:bg-primary_1/90"

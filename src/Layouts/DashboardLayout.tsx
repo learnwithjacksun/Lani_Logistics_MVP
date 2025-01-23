@@ -1,5 +1,4 @@
 import { Header, Navbar } from "../components/Dashboard";
-import { AnnouncementSlide } from "../components/Common";
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -9,7 +8,6 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
   return (
     <div className="min-h-[100dvh] pb-24">
       <Header />
-      <AnnouncementSlide />
       <main className="layout py-6">
         {title && (
           <h1 className="text-xl font-bold text-main mb-6">{title}</h1>

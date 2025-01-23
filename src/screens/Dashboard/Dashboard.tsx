@@ -13,17 +13,18 @@ import DashboardLayout from "../../Layouts/DashboardLayout";
 import { getGreeting } from "../../utils/helpers";
 import { useAuth, useOrder, useNotifications } from "../../hooks";
 import InstallPWA from "../../components/Common/InstallPWA";
+import { Banner } from "../../components/Dashboard";
 
 const services = [
   {
-    title: "Request Dispatch",
-    description: "Send packages across the city",
+    title: "Dispatch",
+    description: "Send packages across your city",
     icon: Bike,
     path: "/dispatch",
     color: "text-primary_1",
   },
   {
-    title: "Order Food",
+    title: "Food",
     description: "Order from restaurants near you",
     icon: UtensilsCrossed,
     path: "/food",
@@ -45,16 +46,16 @@ const Dashboard = () => {
         title: "Active Orders",
         value: activeOrdersCount.toString().padStart(2, '0'),
         icon: Timer,
-        color: "text-orange-500",
-        bg: "bg-orange-500/10",
+        color: "text-purple-500",
+        bg: "bg-purple-500/10",
         path: "/active-orders"
       },
       {
         title: "Pending Orders",
         value: pendingOrdersCount.toString().padStart(2, '0'),
         icon: CheckCircle,
-        color: "text-green-500",
-        bg: "bg-green-500/10",
+        color: "text-yellow-500",
+        bg: "bg-yellow-500/10",
         path: "/pending-orders"
       },
     ];
@@ -85,27 +86,29 @@ const Dashboard = () => {
     <>
     
     <DashboardLayout title={`${getGreeting()}, ${firstName} 👋`}>
+      {/* banner */}
+      <Banner/>
       {/* Service Cards */}
-      <div className="grid gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         {services.map((service, index) => (
           <Link
             key={index}
             to={service.path}
             className="p-4 border border-line rounded-xl hover:border-primary_1 transition-all duration-300 bg-background group"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4">
               <div
-                className={`p-3 rounded-xl ${
+                className={`h-12 w-12 center rounded-xl ${
                   service.color === "text-primary_1"
-                    ? "bg-primary_1/10"
-                    : "bg-primary_2/10"
+                    ? "bg-orange-500/10"
+                    : "bg-green-500/10"
                 }`}
               >
                 <service.icon size={24} className={service.color} />
               </div>
               <div>
                 <h3 className="font-semibold text-main">{service.title}</h3>
-                <p className="text-sub text-sm mt-1">{service.description}</p>
+                <p className="text-sub font-dm text-xs mt-1">{service.description}</p>
               </div>
             </div>
           </Link>
@@ -120,6 +123,9 @@ const Dashboard = () => {
             to={stat.path}
             className="p-4 rounded-xl border border-line bg-background hover:border-primary_1 transition-all"
           >
+             <div className={`h-12 w-12 center rounded-lg ${stat.bg}`}>
+                <stat.icon size={20} className={stat.color} />
+              </div>
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sub text-sm">{stat.title}</p>
@@ -127,9 +133,7 @@ const Dashboard = () => {
                   {stat.value}
                 </h3>
               </div>
-              <div className={`p-2 rounded-lg ${stat.bg}`}>
-                <stat.icon size={20} className={stat.color} />
-              </div>
+             
             </div>
           </Link>
         ))}

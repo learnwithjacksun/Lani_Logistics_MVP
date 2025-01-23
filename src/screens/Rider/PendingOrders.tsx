@@ -8,6 +8,8 @@ const PendingOrders = () => {
   const { orders } = useOrder();
   const navigate = useNavigate();
 
+  console.log(orders);
+
   const pendingOrders = orders.filter(order => order.status === "pending");
 
   const imgUrl = (img: string) => {

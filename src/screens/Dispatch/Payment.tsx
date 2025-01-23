@@ -10,22 +10,25 @@ interface PaymentProps {
   deliveryDetails: DispatchForm;
   onPaymentClose: () => void;
   selectedCity: string;
+  totalAmount: string;
 }
 
 const publicKey = "pk_test_36a25be00a369ea7d01b5354a5d83e3c003c2cde";
 
-const Payment = ({
+const Payment: React.FC<PaymentProps> = ({
   deliveryDetails,
   onPaymentClose,
   selectedCity,
-}: PaymentProps) => {
+  totalAmount,
+
+}) => {
   const [paymentType, setPaymentType] = useState<'sender' | 'receiver'>('sender');
   const { userData } = useAuth();
   const { createDispatchOrder } = useOrder();
 
   const componentProps = {
     email: userData?.email,
-    amount: deliveryDetails.amount * 100,
+    amount: Number(totalAmount) * 100,
     metadata: {
       name: userData?.name,
       phone: userData?.phone,
@@ -41,7 +44,8 @@ const Payment = ({
     toast.promise(
       createDispatchOrder({
         ...deliveryDetails,
-        paymentType: type
+        paymentType: type,
+        amount: Number(totalAmount),
       }, selectedCity),
       {
         loading: "Creating order...",
@@ -156,7 +160,7 @@ const Payment = ({
           <div className="flex items-center justify-between">
             <span className="text-main font-medium">Total Amount</span>
             <span className="text-xl font-semibold text-primary_1">
-              ₦{deliveryDetails.amount.toLocaleString()}
+              ₦{totalAmount}
             </span>
           </div>
         </div>

@@ -10,6 +10,10 @@ export interface DispatchForm {
   pickupLandmark?: string;
   deliveryAddress: string;
   deliveryLandmark?: string;
+  pickupLatitude?: number;
+  pickupLongitude?: number;
+  deliveryLatitude?: number;
+  deliveryLongitude?: number;
   notes?: string;
   pickupTime: "immediate" | "scheduled";
   pickupDate?: string;
@@ -37,13 +41,19 @@ const useDispatchForm = () => {
     pickupLandmark: "",
     deliveryAddress: "",
     deliveryLandmark: "",
+    pickupLatitude: 0,
+    pickupLongitude: 0,
+    deliveryLatitude: 0,
+    deliveryLongitude: 0,
     notes: "",
     pickupTime: "immediate",
     pickupDate: getInitialDateTime(),
     receiverName: "",
     receiverPhone: "",
-    amount: 1600,
-    deliveryCity: "Uyo"
+    amount: 0,
+    deliveryCity: "Uyo",
+    paymentType: "sender",
+    isPaid: false,
   });
 
   const handleChange = (

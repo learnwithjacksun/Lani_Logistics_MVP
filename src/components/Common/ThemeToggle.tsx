@@ -20,7 +20,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 hover:bg-background_2 rounded-full"
+      className="p-3 hover:bg-background_2 rounded-full"
     >
       {isDark ? (
         <Sun size={20} className="text-main" />

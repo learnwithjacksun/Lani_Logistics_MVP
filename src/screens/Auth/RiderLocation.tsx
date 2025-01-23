@@ -13,6 +13,10 @@ const locations = [
     city: "Port Harcourt",
     state: "Rivers",
   },
+  {
+    city: "Abeokuta",
+    state: "Ogun",
+  },
 ];
 
 const RiderLocation = () => {
@@ -57,16 +61,16 @@ const RiderLocation = () => {
               key={location.city}
               type="button"
               onClick={() => setSelectedLocation(location)}
-              className={`p-4 border rounded-xl flex items-center gap-4 transition-all ${
+              className={`p-2 pr-4 border rounded-xl flex items-center gap-4 transition-all ${
                 selectedLocation?.city === location.city
                   ? "border-primary_1 bg-primary_1/5"
                   : "border-line hover:border-primary_1"
               }`}
             >
               <div
-                className={`p-3 rounded-xl ${
+                className={`p-3 rounded-md ${
                   selectedLocation?.city === location.city
-                    ? "bg-primary_1/10 text-primary_1"
+                    ? "bg-orange-500/10 text-primary_1"
                     : "bg-background_2 text-sub"
                 }`}
               >

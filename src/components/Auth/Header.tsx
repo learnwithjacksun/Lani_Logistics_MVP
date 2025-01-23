@@ -9,7 +9,7 @@ const Header = () => {
     <header className="layout py-4 flex justify-between items-center">
       <button 
         onClick={() => navigate(-1)}
-        className="p-2 hover:bg-background_2 bg-background rounded-full"
+        className="p-3 hover:bg-background_2 bg-background rounded-full"
       >
         <ArrowLeft size={20} className="text-main" />
       </button>

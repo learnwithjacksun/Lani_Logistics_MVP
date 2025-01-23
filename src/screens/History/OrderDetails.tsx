@@ -50,7 +50,7 @@ const OrderDetails = () => {
   if (!order) {
     return (
       <DashboardLayout>
-        <div className="max-w-2xl mx-auto text-center py-12">
+        <div className="max-w-2xl mx-auto text-center py-12 flex flex-col items-center justify-center">
           <h1 className="text-xl font-bold text-main mb-2">Order Not Found</h1>
           <p className="text-sub mb-6">The order you're looking for doesn't exist.</p>
           <button 
