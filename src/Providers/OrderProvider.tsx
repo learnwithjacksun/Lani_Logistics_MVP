@@ -9,7 +9,7 @@ import client, {
   STORAGE,
   storage,
 } from "../Backend/appwriteConfig";
-import { useAuth, useMail, useNotifications } from "../hooks";
+import { useAuth, useMail, useMap, useNotifications } from "../hooks";
 import { useNavigate } from "react-router-dom";
 import { generateTrackingId } from "../utils/helpers";
 
@@ -30,6 +30,7 @@ export interface OrderContextType {
 const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { sendEmail } = useMail();
+  const { getLocation, location } = useMap();
   const { createNotifications } = useNotifications();
   const { user, userData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -160,6 +161,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
 
   const acceptOrder = async (orderId: string) => {
     setIsLoading(true);
+    getLocation();
     try {
       // Check number of active orders for this rider
       const activeOrders = orders.filter(
@@ -175,8 +177,8 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         riderId: user?.$id,
         riderName: user?.name,
         riderPhone: userData?.phone,
-        riderLatitude: "", //rider's current latitude,
-        riderLongitude: "" //rider's current longitude
+        riderLatitude: location?.lat, 
+        riderLongitude: location?.lon 
       });
       const customerNotification = {
         title: "Order Accepted!",

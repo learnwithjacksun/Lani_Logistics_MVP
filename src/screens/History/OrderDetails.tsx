@@ -192,7 +192,7 @@ const OrderDetails = () => {
         </div>
 
         <div className="bg-background border border-line rounded-xl p-4">
-          <Link to={`/map/${order.$id}`} className="btn btn-primary">
+          <Link to={`/map/${order.$id}`} className="btn btn-primary h-10 rounded-xl">
             View on Map
           </Link>
         </div>

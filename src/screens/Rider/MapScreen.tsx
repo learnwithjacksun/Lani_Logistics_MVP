@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { useAuth, useOrder } from '../../hooks';
 import { toast } from 'react-hot-toast';
@@ -7,8 +7,11 @@ import { useParams } from 'react-router-dom';
 
 const MapScreen = () => {
   const { orders } = useOrder();
-  const { user } = useAuth();
-  const [riderPosition, setRiderPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const { user, userData } = useAuth();
+  const [riderPosition, setRiderPosition] = useState<{ lat: number; lng: number } | null>({
+    lat: userData?.riderLatitude || 0,
+    lng: userData?.riderLongitude || 0
+  });
   const [pickupPosition, setPickupPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryPosition, setDeliveryPosition] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -30,14 +33,25 @@ const MapScreen = () => {
     }
   }, [currentOrder]);
 
+  const updateRiderLocation = useCallback(async (lat: number, lon: number) => {
+    if(!user?.$id) return;
+    try {
+      await databases.updateDocument(DB, USERS, user?.$id, {
+        riderLatitude: lat,
+        riderLongitude: lon,
+      });
+    } catch (error) {
+      console.error("Error updating rider location:", error);
+    }
+  }, [user?.$id]);
+
   useEffect(() => {
     const updateRiderPosition = async () => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
+        navigator.geolocation.getCurrentPosition(async (position: GeolocationPosition) => {
           const { latitude, longitude } = position.coords;
           setRiderPosition({ lat: latitude, lng: longitude });
 
-          // Send the rider's current position to the backend
           await updateRiderLocation(latitude, longitude);
         });
       } else {
@@ -48,19 +62,9 @@ const MapScreen = () => {
     const intervalId = setInterval(updateRiderPosition, 30000); // Update every 30 seconds
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [updateRiderLocation]);
 
-  const updateRiderLocation = async (lat: number, lon: number) => {
-    if(!user?.$id) return;
-    try {
-      await databases.updateDocument(DB, USERS, user?.$id, {
-        riderLatitude: lat,
-        riderLongitude: lon,
-      });
-    } catch (error) {
-      console.error("Error updating rider location:", error);
-    }
-  };
+  
 
   return (
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
