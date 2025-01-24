@@ -29,9 +29,13 @@ const Login = () => {
   useEffect(() => {
     if (user) {
       setShowSessionModal(true);
-      navigate(from, { replace: true });
+      if(userData?.role === "rider"){
+        navigate("/rider-dashboard", { replace: true });
+      }else{
+        navigate("/dashboard", { replace: true });
+      }
     }
-  }, [from, navigate, user]);
+  }, [from, navigate, user, userData?.role]);
 
   const handleRedirectToDashboard = () => {
     const path = userData?.role === "rider" ? "/rider-dashboard" : "/dashboard";

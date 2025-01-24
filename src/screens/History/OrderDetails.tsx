@@ -1,6 +1,6 @@
 import {Package, MapPin, Clock, Calendar, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { OrderStatus } from "../../types/dispatch";
 import { Modal } from "../../components/Common";
@@ -189,6 +189,12 @@ const OrderDetails = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="bg-background border border-line rounded-xl p-4">
+          <Link to={`/map/${order.$id}`} className="btn btn-primary">
+            View on Map
+          </Link>
         </div>
 
         {/* Amount */}

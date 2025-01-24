@@ -33,6 +33,7 @@ const Food = lazy(() => import("./screens/Food/Food"));
 const ParcelOrderDetails = lazy(
   () => import("./screens/Admin/ParcelOrderDetails")
 );
+const MapScreen = lazy(() => import("./screens/Rider/MapScreen"));
 const NotFound = lazy(() => import("./screens/NotFound"));
 
 const App = () => {
@@ -49,7 +50,7 @@ const App = () => {
           <Route path="/new-password" element={<NewPassword />} />
           <Route path="/location" element={<RiderLocation />} />
 
-          <Route element={<ProtectedRoute/>}>
+          <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/dispatch" element={<Dispatch />} />
@@ -67,6 +68,7 @@ const App = () => {
               <Route path="orders" element={<ParcelOrders />} />
               <Route path="orders/:orderId" element={<ParcelOrderDetails />} />
             </Route>
+            <Route path="/map/:orderId" element={<MapScreen />} />
           </Route>
           <Route path="/food" element={<Food />} />
           <Route path="*" element={<NotFound />} />

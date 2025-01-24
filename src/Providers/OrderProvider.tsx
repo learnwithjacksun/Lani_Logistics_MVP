@@ -175,6 +175,8 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         riderId: user?.$id,
         riderName: user?.name,
         riderPhone: userData?.phone,
+        riderLatitude: "", //rider's current latitude,
+        riderLongitude: "" //rider's current longitude
       });
       const customerNotification = {
         title: "Order Accepted!",

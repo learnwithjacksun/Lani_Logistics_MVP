@@ -374,7 +374,7 @@ const RiderDashboard = () => {
                       Complete Delivery
                     </button>
                     <Link
-                      to={`/delivery/${activeDelivery.id}/map`}
+                      to={`/map/${activeDelivery.$id}`}
                       className="px-4 py-3 border text-sm text-main border-line rounded-xl bg-background_2"
                     >
                       View Map

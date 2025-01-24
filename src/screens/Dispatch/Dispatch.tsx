@@ -29,7 +29,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const cities: City[] = [
   // rate is in naira per km
-  { name: "Uyo", state: "Akwa Ibom", rate: 50 },
+  { name: "Uyo", state: "Akwa Ibom", rate: 200 },
   { name: "Port Harcourt", state: "Rivers", rate: 50 },
   { name: "Abeokuta", state: "Ogun", rate: 50 },
 ];
@@ -509,7 +509,7 @@ const Dispatch = () => {
             </div>
 
             {/* Price Summary */}
-            <div className="bg-background_2 p-4 rounded-xl space-y-2">
+            <div className="bg-background p-4 rounded-xl space-y-2">
               <h3 className="font-medium text-main">Price Summary</h3>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-sub">Base Price</span>
@@ -533,6 +533,10 @@ const Dispatch = () => {
                   <span className="text-red-500">-₦100</span>
                 </div>
               )}
+              <div className="pt-2 border-t border-line flex items-center justify-between font-medium">
+                <span className="text-sub text-sm">Flat Rate</span>
+                <span className="text-main">₦{selectedCity.rate}/km</span>
+              </div>
               <div className="pt-2 border-t border-line flex items-center justify-between font-medium">
                 <span className="text-main">Total</span>
                 <span className="text-primary_1">₦{totalAmount}</span>
