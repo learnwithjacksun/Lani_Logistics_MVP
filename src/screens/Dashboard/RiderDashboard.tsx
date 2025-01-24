@@ -13,13 +13,14 @@ import {
   CircleEllipsis,
 } from "lucide-react";
 import DashboardLayout from "../../Layouts/DashboardLayout";
-import { askForLocationPermission, getGreeting } from "../../utils/helpers";
+import { getGreeting } from "../../utils/helpers";
 import { Link, useNavigate } from "react-router-dom";
 import { Modal } from "../../components/Common";
 import toast from "react-hot-toast";
-import { useAuth, useOrder, useNotifications } from "../../hooks";
+import { useAuth, useOrder, useNotifications, useMap } from "../../hooks";
 import { Models } from "appwrite";
 const RiderDashboard = () => {
+  const { getLocation } = useMap(); 
   const navigate = useNavigate();
   const { userData } = useAuth();
   const { allOrders, orders, completeOrder, isLoading } = useOrder();
@@ -30,7 +31,7 @@ const RiderDashboard = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      askForLocationPermission();
+      getLocation();
     }, 10000);
 
     return () => clearTimeout(timer);

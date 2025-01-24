@@ -17,20 +17,21 @@ export const generateTrackingId = () => {
   return trackingId;
 };
 
-export const askForLocationPermission = () => {
+export const askForLocationPermission = async (): Promise<GeolocationPosition> => {
   return new Promise((resolve, reject) => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          resolve(position);
-        },
-        error => {
-          reject(error);
-        }
-      );
-    } else {
+    if (!navigator.geolocation) {
       reject(new Error("Geolocation is not supported by this browser."));
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve(position);
+      },
+      (error) => {
+        reject(error);
+      }
+    );
   });
 };
 

@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { databases, DB, USERS } from '../../Backend/appwriteConfig'; // Import Appwrite client
 import { useParams } from 'react-router-dom';
 import { Header } from '../../components/Dashboard';
+import useMap from '../../hooks/useMap'; // Import the useMap hook
 
 const MapScreen = () => {
   const { orders } = useOrder();
@@ -20,7 +21,7 @@ const MapScreen = () => {
   const orderId = useParams().orderId;
   const currentOrder = orders.find(order => order.$id === orderId);
 
-
+  const { getLocation } = useMap();
 
   useEffect(() => {
     if (currentOrder) {
@@ -34,6 +35,10 @@ const MapScreen = () => {
       });
     }
   }, [currentOrder]);
+
+  useEffect(() => {
+    getLocation(); // Call to get the user's location
+  }, [getLocation]);
 
   const updateRiderLocation = useCallback(async (lat: number, lon: number) => {
     if(!user?.$id) return;
@@ -68,16 +73,13 @@ const MapScreen = () => {
 
   if(!currentOrder) return <div>No order found</div>;
 
-
-  
-
   return (
     <>
     <Header/>
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
       <GoogleMap
         mapContainerStyle={{ height: "100vh", width: "100%" }}
-        center={riderPosition || pickupPosition || deliveryPosition || { lat: 0, lng: 0 }}
+        center={pickupPosition || { lat: 0, lng: 0 }}
         zoom={14}
       >
         {pickupPosition && (
@@ -88,7 +90,7 @@ const MapScreen = () => {
         )}
         {riderPosition && (
           <Marker position={riderPosition} label="Rider" icon={{
-            url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // Custom icon for the rider
+            url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", 
           }} />
         )}
       </GoogleMap>

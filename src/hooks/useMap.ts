@@ -5,14 +5,15 @@ const useMap = () => {
     const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
 
     const getLocation = async () => {
-        const position = await askForLocationPermission();
-
-        // @ts-expect-error position is not typed
-        setLocation({ lat: position.coords.latitude || 0, lon: position.coords.longitude || 0 });
+        try {
+            const position = await askForLocationPermission();
+            setLocation({ lat: position.coords.latitude || 0, lon: position.coords.longitude || 0 });
+        } catch (error) {
+            console.error("Error getting location:", error);
+        }
     }
 
   return {
-    askForLocationPermission,
     getLocation,
     location
   }
