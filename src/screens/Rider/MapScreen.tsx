@@ -4,6 +4,7 @@ import { useAuth, useOrder } from '../../hooks';
 import { toast } from 'react-hot-toast';
 import { databases, DB, USERS } from '../../Backend/appwriteConfig'; // Import Appwrite client
 import { useParams } from 'react-router-dom';
+import { Header } from '../../components/Dashboard';
 
 const MapScreen = () => {
   const { orders } = useOrder();
@@ -18,6 +19,7 @@ const MapScreen = () => {
   // Assuming you have a way to get the current order
   const orderId = useParams().orderId;
   const currentOrder = orders.find(order => order.$id === orderId);
+
 
 
   useEffect(() => {
@@ -64,13 +66,18 @@ const MapScreen = () => {
     return () => clearInterval(intervalId);
   }, [updateRiderLocation]);
 
+  if(!currentOrder) return <div>No order found</div>;
+
+
   
 
   return (
+    <>
+    <Header/>
     <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
       <GoogleMap
         mapContainerStyle={{ height: "100vh", width: "100%" }}
-        center={riderPosition || { lat: 0, lng: 0 }}
+        center={riderPosition || pickupPosition || deliveryPosition || { lat: 0, lng: 0 }}
         zoom={14}
       >
         {pickupPosition && (
@@ -86,6 +93,7 @@ const MapScreen = () => {
         )}
       </GoogleMap>
     </LoadScript>
+    </>
   );
 };
 

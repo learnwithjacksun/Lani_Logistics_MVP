@@ -8,6 +8,7 @@ import client, {
   DISPATCH,
   STORAGE,
   storage,
+  USERS,
 } from "../Backend/appwriteConfig";
 import { useAuth, useMail, useMap, useNotifications } from "../hooks";
 import { useNavigate } from "react-router-dom";
@@ -177,9 +178,16 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         riderId: user?.$id,
         riderName: user?.name,
         riderPhone: userData?.phone,
-        riderLatitude: location?.lat, 
-        riderLongitude: location?.lon 
+        
       });
+
+      if(user?.$id){
+        await databases.updateDocument(DB, USERS, user?.$id, {
+          riderLatitude: location?.lat, 
+          riderLongitude: location?.lon 
+        });
+      }
+
       const customerNotification = {
         title: "Order Accepted!",
         type: "order",
