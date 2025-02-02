@@ -1,4 +1,4 @@
-import { Mail, Phone, ShieldCheck } from "lucide-react";
+import { Loader, Mail, Phone, ShieldCheck } from "lucide-react";
 import DashboardLayout from "../../Layouts/DashboardLayout";
 import { useState } from "react";
 import { Modal, Input } from "../../components/Common";
@@ -12,10 +12,13 @@ const Profile = () => {
   const fullName = userData?.name;
   const email = userData?.email;
   const phone = userData?.phone;
-  const isAdmin = user?.labels?.includes("admin");
+  const isAdmin = userData?.isAdmin === true;
   // const isAdmin = false;
   console.log(isAdmin)
+  console.log(user);
   console.log(userData);
+
+
 
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [newPhone, setNewPhone] = useState("");
@@ -137,7 +140,7 @@ const Profile = () => {
               disabled={loading}
               className="w-full p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
             >
-              {loading ? "Logging out..." : "Log Out"}
+              {loading ? <Loader size={18} className="animate-spin" /> : "Log Out"}
             </button>
           </div>
         </div>

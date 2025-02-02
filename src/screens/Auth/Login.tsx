@@ -1,4 +1,4 @@
-import { Mail, Lock, UserRoundPlus, RefreshCcw } from "lucide-react";
+import { Mail, Lock, UserRoundPlus, RefreshCcw, Loader } from "lucide-react";
 import AuthLayout from "../../Layouts/AuthLayout";
 import { Input, Modal } from "../../components/Common";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -12,9 +12,10 @@ interface LoginForm {
 }
 
 const Login = () => {
-  const { login, loading, userData, user } = useAuth();
-  console.log(user);
+  const { login, loading, user, userData } = useAuth();
+
   const location = useLocation();
+
   const navigate = useNavigate();
   const [showSessionModal, setShowSessionModal] = useState(false);
   const from =
@@ -27,10 +28,17 @@ const Login = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      setShowSessionModal(true);
+    if (userData && user ) {
+      if (userData?.role === "rider") {
+        navigate("/rider-dashboard");
+        setShowSessionModal(true);
+      } else {
+        navigate(from, { replace: true });
+        setShowSessionModal(true);
+      }
     }
-  }, [user]);
+  }, [from, navigate, user, userData, userData?.role]);
+
 
   const handleRedirectToDashboard = () => {
     const path = userData?.role === "rider" ? "/rider-dashboard" : "/dashboard";
@@ -118,7 +126,7 @@ const Login = () => {
           className="btn btn-primary w-full h-10 rounded-full mt-4"
           disabled={loading}
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? <Loader size={18} className="animate-spin" /> : "Sign in"}
         </button>
 
         <div className="flex items-center text-sub font-dm text-sm center my-6 gap-3">
@@ -136,7 +144,7 @@ const Login = () => {
       <Modal
         isOpen={showSessionModal}
         onClose={() => setShowSessionModal(false)}
-        title={`Hello ${userData?.name?.split(" ")[0]}!`}
+        title={`Hello, ${userData?.name?.split(" ")[0]}! 👋`}
       >
         <div className="px-4 space-y-10">
           <p className="text-main text-base">

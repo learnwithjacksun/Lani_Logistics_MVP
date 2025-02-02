@@ -10,21 +10,20 @@ import {
   EmailProvider,
 } from "./Providers";
 
-import { HelmetProvider } from 'react-helmet-async';
-
+import { HelmetProvider } from "react-helmet-async";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
       <BrowserRouter>
         <EmailProvider>
-          <NotificationProvider>
-            <AuthProvider>
+          <AuthProvider>
+            <NotificationProvider>
               <OrderProvider>
                 <App />
               </OrderProvider>
-            </AuthProvider>
-          </NotificationProvider>
+            </NotificationProvider>
+          </AuthProvider>
         </EmailProvider>
       </BrowserRouter>
     </HelmetProvider>

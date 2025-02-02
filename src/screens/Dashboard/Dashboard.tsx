@@ -15,6 +15,7 @@ import { useAuth, useOrder, useNotifications } from "../../hooks";
 import InstallPWA from "../../components/Common/InstallPWA";
 import { Banner } from "../../components/Dashboard";
 
+
 const services = [
   {
     title: "Dispatch",
@@ -34,6 +35,7 @@ const services = [
 
 const Dashboard = () => {
     const { userData } = useAuth();
+    console.log(userData);
     const { orders } = useOrder();
     const { notifications } = useNotifications();
     const firstName = userData?.name.split(" ")[0];

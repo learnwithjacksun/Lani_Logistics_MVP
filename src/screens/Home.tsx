@@ -3,31 +3,11 @@ import { Link } from "react-router-dom";
 import Brand from "../components/Common/Brand";
 import { slides } from "../Constants/data";
 
-// Update the slides data
-// const slides = [
-//   {
-//     title: "Fast Delivery",
-//     description: "Get your packages delivered quickly and securely",
-//     image: "/slides/delivery.png"
-//   },
-//   {
-//     title: "Track Orders",
-//     description: "Real-time tracking of your delivery status",
-//     image: "/slides/tracking.png"
-//   },
-//   {
-//     title: "Safe & Secure",
-//     description: "Your packages are in safe hands with our trusted riders",
-//     image: "/slides/secure.png"
-//   }
-// ];
-
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState<number>(0);
   const [touchEnd, setTouchEnd] = useState<number>(0);
 
-  // Auto-slide functionality
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
@@ -36,7 +16,6 @@ const Home = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Touch handlers
   const handleTouchStart = (e: TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -47,11 +26,11 @@ const Home = () => {
 
   const handleTouchEnd = () => {
     if (touchStart - touchEnd > 75) {
-      setCurrentSlide(prev => (prev === slides.length - 1 ? 0 : prev + 1));
+      setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }
 
     if (touchStart - touchEnd < -75) {
-      setCurrentSlide(prev => (prev === 0 ? slides.length - 1 : prev - 1));
+      setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
     }
   };
 
@@ -60,22 +39,20 @@ const Home = () => {
       <div className="layout h-[100dvh] flex flex-col items-center justify-between py-10">
         <Brand />
 
-
         <div className=" flex flex-col gap-10">
           <div className="relative">
             <div className="overflow-hidden">
-              <div 
+              <div
                 className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${
-                  currentSlide * 100}%)` }}
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
                 {slides.map((slide, index) => (
                   <div key={index} className="text-center min-w-full">
-                    <img 
-                      src={slide.image} 
+                    <img
+                      src={slide.image}
                       alt={slide.title}
                       className="w-48 h-48 mx-auto mb-6 object-contain"
                     />
@@ -95,7 +72,7 @@ const Home = () => {
                   key={index}
                   onClick={() => setCurrentSlide(index)}
                   className={`w-2 h-2 rounded-full bg-primary_1 ${
-                    currentSlide === index ? 'opacity-100' : 'opacity-40'
+                    currentSlide === index ? "opacity-100" : "opacity-40"
                   }`}
                 ></button>
               ))}
@@ -103,10 +80,16 @@ const Home = () => {
           </div>
 
           <div className="flex md:flex-row flex-col gap-2 px-4">
-            <Link to="/login" className="btn btn-primary min-h-10 flex-1 rounded-full">
+            <Link
+              to="/login"
+              className="btn btn-primary min-h-10 flex-1 rounded-full"
+            >
               Login
             </Link>
-            <Link to="/register" className="btn border bg-background border-line text-main min-h-10 flex-1 rounded-full">
+            <Link
+              to="/register"
+              className="btn border bg-background border-line text-main min-h-10 flex-1 rounded-full"
+            >
               Create new account
             </Link>
           </div>

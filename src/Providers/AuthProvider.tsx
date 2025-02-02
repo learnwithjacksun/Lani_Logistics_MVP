@@ -3,8 +3,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ID, Models, Query } from "appwrite";
 import { account, databases, DB, USERS } from "../Backend/appwriteConfig";
-import { useMail, useNotifications } from "../hooks";
+import { useMail} from "../hooks";
 import toast from "react-hot-toast";
+import { welcomeEmailTemplate } from "../Templates/emails";
 
 export interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -32,7 +33,6 @@ export interface AuthContextType {
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const { sendEmail } = useMail();
-  const { createNotifications } = useNotifications();
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
     null
   );
@@ -40,27 +40,17 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<Models.Document[]>([]);
 
-
   const checkUser = useCallback(async () => {
     try {
       const accountDetails = await account.get();
       setUser(accountDetails);
-
-      if (accountDetails) {
-        const userData = await databases.getDocument(
-          DB,
-          USERS,
-          accountDetails.$id
-        );
-        setUserData(userData);
-      }
+      await getUserData(accountDetails.$id);
     } catch (error) {
       console.log(error);
       setUser(null);
     }
   }, []);
 
-  
   useEffect(() => {
     checkUser();
   }, [checkUser]);
@@ -73,59 +63,70 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     role: "customer" | "rider"
   ) => {
     setLoading(true);
-    let accountResponse;
 
     try {
-      accountResponse = await account.create(
-        ID.unique(),
-        email,
-        password,
-        name
-      );
+      const res = await account.create(ID.unique(), email, password, name);
       await account.createEmailPasswordSession(email, password);
       const accountDetails = await account.get();
-      const userData = await databases.createDocument(
-        DB,
-        USERS,
-        accountResponse.$id,
-        {
-          name,
-          email,
-          phone,
-          role,
-        }
-      );
+      await createUserData(res.$id, name, email, phone, role);
+      await getUserData(res.$id);
       setUser(accountDetails);
-      setUserData(userData);
-      if (userData) {
-        if (userData?.role === "rider") {
-          await navigate("/location");
-        } else {
-          await navigate("/dashboard");
-        }
+      console.log("registered", res);
+
+      if (role === "rider") {
+        await navigate("/location");
       } else {
-        await navigate("/login");
-        toast.error("User already exists");
+        await navigate("/dashboard");
       }
+
       sendEmail(
         email,
-        "Welcome to Lani Logistics",
-        "Thank you for registering with us"
-      );
-      await createNotifications(
-        {
-          title: "Welcome to Lani Logistics",
-          type: "system",
-          content: "Thank you for registering with us",
-          path: "dashboard",
-        },
-        accountResponse.$id
+        "Jackson from Lani Logistics",
+        welcomeEmailTemplate(
+          name,
+          "https://www.lani.ng/dashboard"
+        )
       );
     } catch (error) {
       console.error("Registration error:", error);
       throw new Error((error as Error).message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createUserData = async (
+    userId: string,
+    name: string,
+    email: string,
+    phone: string,
+    role: string
+  ) => {
+    try {
+      const userData = await databases.createDocument(DB, USERS, userId, {
+        userId,
+        name,
+        email,
+        phone,
+        role,
+      });
+      console.log(userData);
+    } catch (error) {
+      console.error("Create user data error:", error);
+      throw new Error((error as Error).message);
+    }
+  };
+
+  const getUserData = async (userId: string) => {
+    try {
+      if (!userId){
+        throw new Error("User ID not found");
+      }
+      const userData = await databases.getDocument(DB, USERS, userId);
+      setUserData(userData);
+    } catch (error) {
+      console.error("Get user data error:", error);
+      throw new Error((error as Error).message);
     }
   };
 
@@ -136,20 +137,21 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   ) => {
     setLoading(true);
     try {
-      await account.createEmailPasswordSession(email, password);
+      if (user) {
+        await account.deleteSession("current");
+      }
+      const res = await account.createEmailPasswordSession(email, password);
       const accountDetails = await account.get();
-      const userData = await databases.getDocument(
-        DB,
-        USERS,
-        accountDetails.$id
-      );
+      await getUserData(accountDetails.$id);
       setUser(accountDetails);
-      setUserData(userData);
+      console.log(res)
 
-      if (userData?.role === "rider") {
-        navigate("/rider-dashboard");
-      } else {
-        navigate(redirectTo);
+      if (userData) {
+        if (userData?.role === "rider") {
+          navigate("/rider-dashboard");
+        } else {
+          navigate(redirectTo);
+        }
       }
     } catch (error) {
       console.error("Login error:", error);

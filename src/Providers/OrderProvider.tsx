@@ -33,7 +33,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   const { sendEmail } = useMail();
   const { getLocation, location } = useMap();
   const { createNotifications } = useNotifications();
-  const { user, userData } = useAuth();
+  const { userData } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [orders, setOrders] = useState<Models.Document[]>([]);
   const [allOrders, setAllOrders] = useState<Models.Document[]>([]);
@@ -59,7 +59,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
         ID.unique(),
         {
           trackingId: `TRX-${id}`,
-          customerId: user?.$id,
+          customerId: userData?.$id,
           city: selectedCity,
           price: data.amount,
           pickupAddress: data.pickupAddress,
@@ -78,9 +78,9 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
           packageName: data.packageName,
           packageTexture: data.packageTexture,
           packageImage: packageImage?.$id,
-          senderName: user?.name,
+          senderName: userData?.name,
           senderPhone: userData?.phone,
-          senderEmail: user?.email,
+          senderEmail: userData?.email,
           isPaid: data.paymentType === 'sender' ? true : false,
         }
       );
@@ -93,9 +93,9 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
       };
       const notifyId = response?.customerId;
       await createNotifications(notification, notifyId);
-      if (user?.email) {
+      if (userData?.email) {
         sendEmail(
-          user?.email,
+          userData?.email,
           "Order Created!",
           `Your order has been placed successfully, and your tracking Id is ${response?.trackingId}. \n A rider will be assigned shortly!`
         );
@@ -110,12 +110,12 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const getUserOrders = useCallback(async () => {
-    if (!user?.$id) return;
+    if (!userData?.$id) return;
     try {
       const orders = await databases.listDocuments(DB, DISPATCH, [
         Query.or([
-          Query.equal("customerId", user?.$id),
-          Query.equal("riderId", user?.$id),
+          Query.equal("customerId", userData?.$id),
+          Query.equal("riderId", userData?.$id),
         ]),
         Query.orderDesc("$createdAt"),
       ]);
@@ -123,10 +123,10 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error(error);
     }
-  }, [user?.$id]);
+  }, [userData?.$id]);
 
   const getAllOrders = useCallback(async () => {
-    if (!user?.$id || !userData?.location) return;
+    if (!userData?.$id || !userData?.location) return;
     try {
       const orders = await databases.listDocuments(DB, DISPATCH, [
         Query.equal("status", "pending"),
@@ -137,7 +137,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error(error);
     }
-  }, [user?.$id, userData?.location]);
+  }, [userData?.$id, userData?.location]);
 
   const getParcelOrders = useCallback(async()=>{
     try {
@@ -158,7 +158,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     getUserOrders();
     getAllOrders();
     getParcelOrders();
-  }, [getUserOrders, getAllOrders, user?.$id, getParcelOrders]);
+  }, [getUserOrders, getAllOrders, userData?.$id, getParcelOrders]);
 
   const acceptOrder = async (orderId: string) => {
     setIsLoading(true);
@@ -166,7 +166,7 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Check number of active orders for this rider
       const activeOrders = orders.filter(
-        order => order.riderId === user?.$id && order.status === "in-transit"
+        order => order.riderId === userData?.$id && order.status === "in-transit"
       );
 
       if (activeOrders.length >= 2) {
@@ -175,14 +175,14 @@ const OrderProvider = ({ children }: { children: React.ReactNode }) => {
 
       const res = await databases.updateDocument(DB, DISPATCH, orderId, {
         status: "in-transit",
-        riderId: user?.$id,
-        riderName: user?.name,
+        riderId: userData?.$id,
+        riderName: userData?.name,
         riderPhone: userData?.phone,
         
       });
 
-      if(user?.$id){
-        await databases.updateDocument(DB, USERS, user?.$id, {
+      if(userData?.$id){
+        await databases.updateDocument(DB, USERS, userData?.$id, {
           riderLatitude: location?.lat, 
           riderLongitude: location?.lon 
         });

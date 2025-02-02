@@ -3,12 +3,12 @@ import client, {
   databases,
   NOTIFICATIONS,
   DB,
-  account,
 } from "../Backend/appwriteConfig";
 import { NotificationContext } from "../Contexts/NotificationContext";
 import { Notification } from "../types/notification";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../hooks";
 
 export interface NotificationContextType {
   createNotifications: (
@@ -23,27 +23,15 @@ export interface NotificationContextType {
 }
 
 const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-  const [userId, setUserId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<Models.Document[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+const {userData} = useAuth()
 
-  console.log(userId)
 
-  useEffect(() => {
-    const getUserId = async () => {
-      try {
-        const user = await account.get();
-        const userId = user?.$id;
-        console.log(user)
-        setUserId(userId);
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    };
-    getUserId();
-  }, []);
+
+
+
 
   const createNotifications = useCallback(async (
     notification: Notification,
@@ -76,21 +64,25 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getNotifications = useCallback(async () => {
     try {
-      if (!userId) return;
+      if (!userData) return;
       const notifications = await databases.listDocuments(DB, NOTIFICATIONS, [
-        Query.equal("notificationId", userId),
+        Query.equal("notificationId", [userData?.$id]),
         Query.orderDesc("$createdAt"),
+
       ]);
       setNotifications(notifications.documents as Models.Document[]);
+      console.log(notifications.documents)
     } catch (error) {
       console.error(error);
-      throw error;
+      throw new Error((error as Error).message);
     }
-  }, [userId]);
+  }, [userData]);
+
 
   useEffect(() => {
     getNotifications();
-  }, [getNotifications, userId, createNotifications]);
+  }, [getNotifications, userData, createNotifications]);
+
 
   useEffect(() => {
     if (notifications) {

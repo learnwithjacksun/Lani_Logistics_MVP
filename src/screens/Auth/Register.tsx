@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import AuthLayout from "../../Layouts/AuthLayout";
 import Input from "../../components/Common/Input";
 import { useState } from "react";
-import { useAuth } from "../../hooks";
+import { useAuth, useNotifications } from "../../hooks";
 import toast from "react-hot-toast";
 
 interface FormData {
@@ -15,7 +15,8 @@ interface FormData {
 }
 
 const Register = () => {
-  const { register, loading } = useAuth();
+  const { register, loading, user } = useAuth();
+  const { createNotifications } = useNotifications();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -27,27 +28,22 @@ const Register = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
     if (!formData.name || !formData.email || !formData.phone || !formData.password) {
       toast.error('All fields are required');
       return;
     }
 
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast.error('Please enter a valid email');
       return;
     }
 
-    // Validate phone (Nigerian format)
-    const phoneRegex = /^(\+234|0)[789][01]\d{8}$/;
-    if (!phoneRegex.test(formData.phone)) {
-      toast.error('Please enter a valid Nigerian phone number');
+    if(!formData.phone){
+      toast.error('Please enter a valid phone number');
       return;
     }
 
-    // Validate password
     if (formData.password.length < 8) {
       toast.error('Password must be at least 8 characters');
       return;
@@ -64,10 +60,26 @@ const Register = () => {
       ),
       {
         loading: "Creating Account...",
-        success: "Account Created Successfully!",
-        error: (err)=>{
-          return err
-        }
+        success: () => {
+          if (user) {
+           createNotifications(
+            {
+              title: "Welcome to Lani Logistics",
+              type: "system",
+              content: "Thank you for registering with us",
+              path: "dashboard",
+            },
+            user?.$id
+          );
+          }
+          return "Account Created Successfully!";
+        },
+
+
+        error: (err) => {
+          return (err as Error).message;
+        },
+
       }
     )
 
